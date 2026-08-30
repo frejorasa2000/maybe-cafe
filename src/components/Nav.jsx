@@ -12,6 +12,7 @@ export default function Nav() {
           <a href="#menu">Menu</a>
           <a href="#events">Private Events</a>
           <a href="#gallery">Gallery</a>
+          <a href="#reviews">Reviews</a>
           <a href="#contact">Contact</a>
         </nav>
         <a href="#visit" className="btn btn-solid nav-cta">

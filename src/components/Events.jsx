@@ -30,8 +30,8 @@ export default function Events() {
               >
                 Call for Events: {PHONE.display}
               </a>
-              <a href="#contact" className="btn btn-outline" style={{ color: 'var(--coffee)', borderColor: 'var(--coffee)' }}>
-                Message Us
+              <a href="#event-request" className="btn btn-outline" style={{ color: 'var(--coffee)', borderColor: 'var(--coffee)' }}>
+                Request Info
               </a>
             </div>
           </div>
