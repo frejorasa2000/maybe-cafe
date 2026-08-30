@@ -111,12 +111,14 @@ export default async function handler(req, res) {
 
     if (!emailResponse.ok) {
       const details = await emailResponse.text();
+      console.error('Resend API error:', emailResponse.status, details);
       res.status(502).json({ error: 'Failed to send email', details });
       return;
     }
 
     res.status(200).json({ ok: true });
   } catch (error) {
+    console.error('send-event-request error:', error);
     res.status(500).json({ error: 'Unexpected server error.' });
   }
 }
