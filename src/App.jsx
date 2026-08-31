@@ -8,7 +8,8 @@ import Menu from './components/Menu';
 import Visit from './components/Visit';
 import FullMenu from './components/FullMenu';
 import Events from './components/Events';
-import EventRequestForm from './components/EventRequestForm';
+// TODO: re-enable once the Resend email sending is confirmed working
+// import EventRequestForm from './components/EventRequestForm';
 import Gallery from './components/Gallery';
 import Reviews from './components/Reviews';
 import Contact from './components/Contact';
@@ -25,7 +26,7 @@ export default function App() {
       <Visit />
       <FullMenu />
       <Events />
-      <EventRequestForm />
+      {/* <EventRequestForm /> */}
       <Gallery />
       <Reviews />
       <Contact />
