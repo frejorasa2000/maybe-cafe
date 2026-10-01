@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maybe Café — Opción C: Vibrante</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#fff8ef;
+    --ink:#1f1a2e;
+    --pink:#ff6f91;
+    --green:#3dae7c;
+    --orange:#ff9f43;
+    --purple:#7c5cff;
+    --line: rgba(31,26,46,0.12);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0; background:var(--cream); color:var(--ink); font-family:'Space Grotesk',sans-serif; overflow-x:hidden;}
+  .display{font-family:'Bricolage Grotesque', sans-serif;}
+  .container{max-width:1300px; margin:0 auto; padding:0 40px;}
+
+  .reveal{opacity:0; transform:translateY(30px) rotate(-1deg); transition:opacity .7s cubic-bezier(.34,1.56,.64,1), transform .7s cubic-bezier(.34,1.56,.64,1);}
+  .reveal.in{opacity:1; transform:translateY(0) rotate(0deg);}
+
+  @keyframes float{ 0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(-16px) rotate(3deg);} }
+  @keyframes floatSlow{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(14px);} }
+  @keyframes spin-slow{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  @keyframes blob{ 0%,100%{border-radius:42% 58% 63% 37% / 41% 44% 56% 59%;} 50%{border-radius:58% 42% 39% 61% / 55% 62% 38% 45%;} }
+
+  .blob{position:absolute; filter:blur(1px); animation:blob 9s ease-in-out infinite; z-index:0;}
+
+  header{
+    position:sticky; top:0; z-index:50; display:flex; align-items:center; justify-content:space-between;
+    padding:20px 40px; background:var(--cream); border-bottom:3px solid var(--ink);
+  }
+  .logo-mark{display:flex; align-items:center; gap:12px;}
+  .logo-mark img{height:42px;}
+  .logo-word{font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:22px;}
+  nav{display:flex; gap:8px; font-size:14px; font-weight:600;}
+  nav a{color:var(--ink); text-decoration:none; padding:10px 16px; border-radius:100px; transition:background .25s ease, transform .25s ease;}
+  nav a:hover{background:var(--pink); color:#fff; transform:translateY(-2px);}
+  .nav-cta{
+    font-size:14px; font-weight:700; background:var(--ink); color:var(--cream); padding:12px 22px;
+    border-radius:100px; text-decoration:none; border:2px solid var(--ink); transition:transform .25s cubic-bezier(.34,1.56,.64,1), background .25s ease;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .nav-cta:hover{transform:translateY(-3px) rotate(-2deg); background:var(--purple); border-color:var(--purple);}
+
+  /* hero */
+  .hero{position:relative; padding-top:90px; padding-bottom:60px; overflow:hidden;}
+  .hero-grid{display:grid; grid-template-columns:1.1fr .9fr; gap:50px; align-items:center; position:relative; z-index:1;}
+  .badge{
+    display:inline-flex; align-items:center; gap:8px; background:#fff; border:2px solid var(--ink); border-radius:100px;
+    padding:8px 16px 8px 8px; font-size:13px; font-weight:700; margin-bottom:26px;
+  }
+  .badge .dot{width:26px; height:26px; border-radius:50%; background:var(--orange); display:flex; align-items:center; justify-content:center; font-size:14px;}
+  .hero h1{
+    font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(48px,6.4vw,92px); line-height:.98; margin:0 0 24px; letter-spacing:-.02em;
+  }
+  .hero h1 .hl{position:relative; white-space:nowrap;}
+  .hero h1 .hl::after{
+    content:''; position:absolute; left:-4px; right:-4px; bottom:6px; height:.32em; background:var(--pink); z-index:-1; border-radius:6px;
+    transform:scaleX(0); transform-origin:left; animation:underline .8s .5s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  @keyframes underline{ to{transform:scaleX(1);} }
+  .hero p.lede{font-size:18px; line-height:1.6; max-width:460px; color:#463f57; margin:0 0 36px; font-weight:500;}
+  .hero-actions{display:flex; gap:16px; flex-wrap:wrap;}
+  .btn-pop{
+    background:var(--ink); color:var(--cream); padding:16px 30px; border-radius:100px; text-decoration:none;
+    font-weight:700; font-size:15px; border:2px solid var(--ink); display:inline-flex; align-items:center; gap:10px;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .3s ease;
+  }
+  .btn-pop:hover{transform:translateY(-4px) rotate(-2deg); background:var(--green); border-color:var(--green);}
+  .btn-outline{
+    background:transparent; color:var(--ink); padding:16px 30px; border-radius:100px; text-decoration:none;
+    font-weight:700; font-size:15px; border:2px solid var(--ink); transition:transform .3s cubic-bezier(.34,1.56,.64,1), background .3s ease, color .3s ease;
+  }
+  .btn-outline:hover{transform:translateY(-4px) rotate(2deg); background:var(--ink); color:var(--cream);}
+
+  .hero-visual{position:relative;}
+  .hero-visual .card{
+    position:relative; border-radius:32px; overflow:hidden; border:3px solid var(--ink);
+    box-shadow:10px 10px 0 var(--ink); aspect-ratio:4/5;
+  }
+  .hero-visual .card img{width:100%; height:100%; object-fit:cover;}
+  .float-chip{
+    position:absolute; background:#fff; border:2.5px solid var(--ink); border-radius:20px; padding:14px 18px;
+    box-shadow:6px 6px 0 var(--ink); font-weight:700; font-size:14px; display:flex; align-items:center; gap:10px;
+    animation:float 5s ease-in-out infinite;
+  }
+  .float-chip.one{ top:-26px; left:-40px; animation-delay:.2s; }
+  .float-chip.two{ bottom:24px; right:-38px; animation-delay:1.2s; background:var(--orange); color:var(--ink);}
+  .chip-emoji{width:30px; height:30px; border-radius:50%; background:var(--purple); flex:none;}
+
+  /* strip */
+  .strip{
+    background:var(--ink); color:var(--cream); padding:18px 0; overflow:hidden; white-space:nowrap;
+    border-top:3px solid var(--ink); border-bottom:3px solid var(--ink); margin-top:60px;
+  }
+  .strip-track{display:inline-flex; gap:44px; animation:marquee 22s linear infinite; font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:20px;}
+  .strip-track span{display:inline-flex; align-items:center; gap:44px;}
+  .strip-track span::after{content:'✦'; color:var(--orange);}
+  @keyframes marquee{ from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+  /* story bento */
+  .story{padding-top:110px; padding-bottom:110px;}
+  .section-head{max-width:600px; margin-bottom:56px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.06em;
+    background:var(--green); color:#fff; padding:6px 14px; border-radius:100px; margin-bottom:18px;
+  }
+  .story h2{font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(34px,4vw,52px); margin:0 0 16px; line-height:1.05;}
+  .story p.sub{font-size:17px; color:#463f57; line-height:1.6; margin:0;}
+  .bento{display:grid; grid-template-columns:repeat(4,1fr); grid-template-rows:repeat(2,220px); gap:20px;}
+  .bento-item{
+    border-radius:28px; border:3px solid var(--ink); padding:28px; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:flex-end;
+  }
+  .bento-item.photo{grid-column:span 2; grid-row:span 2; padding:0;}
+  .bento-item.photo img{width:100%; height:100%; object-fit:cover;}
+  .bento-item.stat{grid-column:span 2; background:var(--purple); color:#fff; justify-content:center;}
+  .bento-item.stat .n{font-family:'Bricolage Grotesque',sans-serif; font-size:56px; font-weight:800; line-height:1;}
+  .bento-item.stat .l{font-size:14px; font-weight:600; margin-top:6px;}
+  .bento-item.quote{grid-column:span 2; background:var(--orange);}
+  .bento-item.quote p{font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:22px; line-height:1.3; margin:0;}
+
+  /* menu */
+  .menu{padding-top:40px; padding-bottom:120px;}
+  .menu-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:26px;}
+  .dish{
+    background:#fff; border:3px solid var(--ink); border-radius:28px; overflow:hidden;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease; box-shadow:0 0 0 var(--ink);
+  }
+  .dish:hover{transform:translateY(-8px) rotate(-1deg); box-shadow:8px 10px 0 var(--ink);}
+  .dish .imgwrap{aspect-ratio:1/1; position:relative;}
+  .dish .imgwrap img{width:100%; height:100%; object-fit:cover;}
+  .dish-tag{
+    position:absolute; top:14px; left:14px; background:var(--pink); color:#fff; font-size:11px; font-weight:700;
+    text-transform:uppercase; padding:6px 12px; border-radius:100px; border:2px solid var(--ink);
+  }
+  .dish-body{padding:22px 24px 26px;}
+  .dish h3{font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:22px; margin:0 0 8px;}
+  .dish p{font-size:14px; line-height:1.55; color:#463f57; margin:0;}
+
+  /* events */
+  .events{padding-top:40px; padding-bottom:120px;}
+  .events-card{
+    background:var(--purple); border:3px solid var(--ink); border-radius:36px; padding:70px; display:grid;
+    grid-template-columns:1.1fr .9fr; gap:60px; align-items:center; color:#fff; position:relative; overflow:hidden;
+  }
+  .events-copy h2{font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(32px,3.6vw,48px); margin:0 0 20px; line-height:1.1;}
+  .events-copy p{font-size:16px; line-height:1.7; opacity:.9; max-width:440px; margin:0 0 26px;}
+  .events-list{list-style:none; padding:0; margin:0 0 34px; display:flex; flex-direction:column; gap:14px;}
+  .events-list li{display:flex; align-items:center; gap:12px; font-size:15px; font-weight:600;}
+  .events-list li .check{width:24px; height:24px; border-radius:50%; background:#fff; color:var(--purple); display:flex; align-items:center; justify-content:center; flex:none; font-weight:800; font-size:13px;}
+  .events-visual{position:relative;}
+  .events-visual .card{border-radius:26px; overflow:hidden; border:3px solid var(--ink); box-shadow:8px 8px 0 rgba(0,0,0,.25); aspect-ratio:1/1;}
+  .events-visual img{width:100%; height:100%; object-fit:cover;}
+  .btn-white{
+    background:#fff; color:var(--purple); padding:16px 30px; border-radius:100px; text-decoration:none; font-weight:700;
+    display:inline-flex; align-items:center; gap:10px; border:2px solid #fff; transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .btn-white:hover{transform:translateY(-4px) rotate(-2deg);}
+
+  /* visit */
+  .visit{padding-top:40px; padding-bottom:90px;}
+  .visit-card{
+    background:var(--ink); color:var(--cream); border-radius:36px; padding:80px 70px; text-align:center; position:relative; overflow:hidden;
+  }
+  .visit-card h2{font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:clamp(38px,5vw,64px); margin:0 0 22px; line-height:1.05;}
+  .visit-card p{font-size:17px; opacity:.75; max-width:480px; margin:0 auto 44px;}
+  .visit-grid{display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-bottom:50px;}
+  .visit-pill{
+    background:rgba(255,255,255,.08); border:2px solid rgba(255,255,255,.2); border-radius:20px; padding:20px 26px; text-align:left; min-width:220px;
+  }
+  .visit-pill .k{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--orange); margin-bottom:8px; font-weight:700;}
+  .visit-pill .v{font-size:16px; font-weight:600;}
+  .visit-pill a{color:var(--cream); text-decoration:none;}
+  footer{padding:30px 40px; display:flex; justify-content:space-between; align-items:center; font-size:13px; color:#463f57; flex-wrap:wrap; gap:12px;}
+  .foot-social{display:flex; gap:20px;}
+  .foot-social a{color:var(--ink); text-decoration:none; font-weight:700;}
+
+  .tagbar{
+    position:fixed; bottom:24px; right:24px; z-index:60; background:var(--pink); color:#fff;
+    padding:10px 18px; font-size:12px; font-weight:700; border-radius:100px; border:2px solid var(--ink); box-shadow:4px 4px 0 var(--ink);
+  }
+
+  @media (max-width:980px){
+    .hero-grid{grid-template-columns:1fr;}
+    .bento{grid-template-columns:repeat(2,1fr); grid-template-rows:repeat(4,200px);}
+    .bento-item.photo{grid-column:span 2; grid-row:span 1;}
+    .menu-grid{grid-template-columns:1fr 1fr;}
+    .events-card{grid-template-columns:1fr; padding:40px;}
+    nav{display:none;}
+    .container{padding:0 22px;}
+    .visit-card{padding:50px 30px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="tagbar">Opción C · Vibrante</div>
+
+<header>
+  <div class="logo-mark">
+    <img src="assets/logo.png" alt="Maybe Café">
+    <span class="logo-word">Maybe Café</span>
+  </div>
+  <nav>
+    <a href="#menu">Menú</a>
+    <a href="#historia">Historia</a>
+    <a href="#eventos">Eventos</a>
+    <a href="#visitanos">Visítanos</a>
+  </nav>
+  <a class="nav-cta" href="#visitanos">Cómo llegar →</a>
+</header>
+
+<section class="hero container">
+  <div class="blob" style="width:340px;height:340px;background:rgba(255,111,145,.28); top:-60px; right:-80px;"></div>
+  <div class="blob" style="width:220px;height:220px;background:rgba(61,174,124,.25); bottom:0; left:10%; animation-duration:11s;"></div>
+  <div class="hero-grid">
+    <div>
+      <div class="badge reveal"><span class="dot">☕</span> Ahora con hogar fijo en Carmel, NY</div>
+      <h1 class="reveal">Café que se<br><span class="hl">persigue</span> de verdad</h1>
+      <p class="lede reveal">Espresso artesanal, matchas de colores, açaí bowls y pastelería fresca. De un trailer que recorría el barrio a tu nuevo rincón favorito.</p>
+      <div class="hero-actions reveal">
+        <a class="btn-pop" href="#menu">Ver el menú ✦</a>
+        <a class="btn-outline" href="#visitanos">Cómo llegar</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="card reveal">
+        <img src="assets/establishment.jpg" alt="Maybe Café — nuestro trailer">
+      </div>
+      <div class="float-chip one"><span class="chip-emoji"></span> +8 sabores de matcha</div>
+      <div class="float-chip two">Açaí bowls frescos ✦</div>
+    </div>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="strip-track">
+    <span>Strawberry Matcha</span><span>Açaí Bowls</span><span>Tiramisu Latte</span><span>Cookie Butter Latte</span><span>Eventos Privados</span>
+    <span>Strawberry Matcha</span><span>Açaí Bowls</span><span>Tiramisu Latte</span><span>Cookie Butter Latte</span><span>Eventos Privados</span>
+  </div>
+</div>
+
+<section class="story container" id="historia">
+  <div class="section-head reveal">
+    <span class="eyebrow">Nuestra historia</span>
+    <h2>Más que una parada de café</h2>
+    <p class="sub">Empezamos como un trailer itinerante — hoy tenemos raíces propias, pero la misma idea: café hecho a mano y un lugar para bajar el ritmo.</p>
+  </div>
+  <div class="bento">
+    <div class="bento-item photo reveal"><img src="assets/utencilios.jpg" alt="Preparación de matcha"></div>
+    <div class="bento-item stat reveal"><div class="n">100%</div><div class="l">Hecho a mano, cada pedido</div></div>
+    <div class="bento-item quote reveal"><p>"Cada visita es una invitación a quedarte un rato más."</p></div>
+  </div>
+</section>
+
+<section class="menu container" id="menu">
+  <div class="section-head reveal">
+    <span class="eyebrow">Nuestro menú</span>
+    <h2>Favoritos de la casa</h2>
+    <p class="sub">Bebidas artesanales y açaí bowls, pensados para alegrar cualquier momento.</p>
+  </div>
+  <div class="menu-grid">
+    <div class="dish reveal">
+      <div class="imgwrap"><img src="assets/strawberry-matcha.jpg" alt="Strawberry Matcha"><span class="dish-tag">Matcha</span></div>
+      <div class="dish-body"><h3>Strawberry Matcha</h3><p>Matcha vibrante con dulce de fresa, servido sobre hielo.</p></div>
+    </div>
+    <div class="dish reveal">
+      <div class="imgwrap"><img src="assets/tiramisu-latte.jpg" alt="Tiramisu Latte"><span class="dish-tag">Iced Latte</span></div>
+      <div class="dish-body"><h3>Tiramisu Latte</h3><p>Espresso y leche vaporizada con sabor a tiramisú, servido frío.</p></div>
+    </div>
+    <div class="dish reveal">
+      <div class="imgwrap"><img src="assets/nutella-acai.jpg" alt="Nutella Dream"><span class="dish-tag">Açaí Bowl</span></div>
+      <div class="dish-body"><h3>Nutella Dream</h3><p>Açaí con plátano, fresa, Nutella, granola, Oreo y chocolate.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="events container" id="eventos">
+  <div class="events-card">
+    <div class="blob" style="width:260px;height:260px;background:rgba(255,255,255,.12); top:-60px; right:-40px;"></div>
+    <div class="events-copy">
+      <span class="eyebrow" style="background:#fff; color:var(--purple);">Eventos privados</span>
+      <h2>Llevamos Maybe Café a tu evento</h2>
+      <p>De cumpleaños a bodas, mañanas corporativas y pop-ups comunitarios — armamos una barra de espresso completa donde tú estés.</p>
+      <ul class="events-list">
+        <li><span class="check">✓</span> Menú de bebidas personalizado</li>
+        <li><span class="check">✓</span> Barra de espresso y pastelería fresca</li>
+        <li><span class="check">✓</span> Nosotros armamos, servimos y limpiamos</li>
+      </ul>
+      <a class="btn-white" href="tel:19149062937">Llamar: (914) 906-2937</a>
+    </div>
+    <div class="events-visual reveal">
+      <div class="card"><img src="assets/tropical-acai.jpg" alt="Tropical Paradise açaí bowl"></div>
+    </div>
+  </div>
+</section>
+
+<section class="visit container" id="visitanos">
+  <div class="visit-card">
+    <div class="blob" style="width:300px;height:300px;background:rgba(255,159,67,.18); bottom:-80px; left:-60px;"></div>
+    <h2 class="reveal">Ven a saludar 👋</h2>
+    <p class="reveal">Echamos raíces en Promenade on 6. Pasa por café artesanal, pastelería fresca y buena onda.</p>
+    <div class="visit-grid">
+      <div class="visit-pill reveal"><div class="k">Dirección</div><div class="v">1875 Route 6, Carmel, NY 10512</div></div>
+      <div class="visit-pill reveal"><div class="k">Teléfono</div><div class="v"><a href="tel:19149062937">(914) 906-2937</a></div></div>
+      <div class="visit-pill reveal"><div class="k">Horario</div><div class="v">Próximamente — síguenos en redes</div></div>
+    </div>
+    <a class="btn-white reveal" href="https://share.google/jPmOYwJkeAO9ff8UG">Cómo llegar →</a>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Maybe Café. Todos los derechos reservados.</span>
+  <div class="foot-social">
+    <a href="#">Instagram @maybe_trailer</a>
+    <a href="#">TikTok @maybe_trailer</a>
+    <a href="#">Facebook</a>
+  </div>
+</footer>
+
+<script>
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if(e.isIntersecting){
+        setTimeout(() => e.target.classList.add('in'), i * 70);
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: .15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>

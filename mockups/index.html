@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Maybe Café — Mockups</title>
+<style>
+  body{margin:0; font-family:system-ui,sans-serif; background:#111; color:#fff; display:flex; align-items:center; justify-content:center; min-height:100vh;}
+  .wrap{max-width:720px; padding:60px 24px; text-align:center;}
+  h1{font-size:32px; margin-bottom:8px;}
+  p{color:#aaa; margin-bottom:40px;}
+  .cards{display:grid; grid-template-columns:1fr; gap:16px; text-align:left;}
+  a.card{display:block; background:#1c1c1c; border:1px solid #333; border-radius:12px; padding:22px 26px; text-decoration:none; color:#fff; transition:border-color .2s ease, transform .2s ease;}
+  a.card:hover{border-color:#888; transform:translateX(4px);}
+  a.card .n{font-size:12px; text-transform:uppercase; letter-spacing:.1em; color:#f0a04b; font-weight:700;}
+  a.card h2{margin:6px 0 4px; font-size:20px;}
+  a.card span{color:#999; font-size:14px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Maybe Café — 3 propuestas</h1>
+  <p>Mockups estáticos con animaciones de referencia (scroll-reveal, parallax, marquee). Base para la versión final en React + Tailwind + Framer Motion.</p>
+  <div class="cards">
+    <a class="card" href="option-a2-editorial.html" style="border-color:#5c4a2f;">
+      <div class="n">Opción A2 · Nueva</div>
+      <h2>Editorial + Movimiento</h2>
+      <span>Cursor personalizado, cortina de entrada, texto que se arma línea por línea, historia con scroll pineado, tags de menú a color, cards con tilt 3D.</span>
+    </a>
+    <a class="card" href="option-b2-luxury.html" style="border-color:#5c4a2f;">
+      <div class="n">Opción B2 · Nueva</div>
+      <h2>Luxury Dark + Movimiento</h2>
+      <span>Partículas ambiente, cursor dorado, parallax con el mouse, historia con scroll pineado y acento vino para más profundidad.</span>
+    </a>
+    <a class="card" href="option-a-editorial.html">
+      <div class="n">Opción A · v1</div>
+      <h2>Editorial</h2>
+      <span>Versión original, sin las animaciones nuevas — para comparar.</span>
+    </a>
+    <a class="card" href="option-b-luxury.html">
+      <div class="n">Opción B · v1</div>
+      <h2>Luxury Dark</h2>
+      <span>Versión original, sin las animaciones nuevas — para comparar.</span>
+    </a>
+    <a class="card" href="option-c-vibrant.html">
+      <div class="n">Opción C</div>
+      <h2>Vibrante</h2>
+      <span>Bento grid, colores vivos, tipografía bold redondeada — conecta con el público joven de Instagram/TikTok.</span>
+    </a>
+  </div>
+</div>
+</body>
+</html>
