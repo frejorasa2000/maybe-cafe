@@ -25,6 +25,8 @@ const product = (id, name, category, tag, en, es, sizes, groups) => ({
 
 const drink = (small, large) => ({ '16oz': small, '20oz': large });
 
+const photo = (id, en, es) => ({ id, image: `/gallery/${id}.jpg`, alt: { en, es }, active: true });
+
 export const DEFAULT_CATALOG = {
   version: 0,
   products: [
@@ -176,4 +178,24 @@ export const DEFAULT_CATALOG = {
   },
   // Stop taking online orders this many minutes before closing.
   lastOrderMinutes: 15,
+  // Photos in the "Gallery" carousel, in order. `alt` describes the photo for
+  // screen readers and search engines.
+  gallery: [
+    photo('camion-fondo', 'Maybe Café', 'Maybe Café'),
+    photo('camion', 'Maybe Café trailer on opening night', 'El tráiler de Maybe Café en la noche de apertura'),
+    photo('cliente', 'A customer enjoying Maybe Café', 'Disfrutando de Maybe Café'),
+    photo('cliente2', 'Maybe Café owner at the trailer', 'En el tráiler de Maybe Café'),
+    photo('utencilios', 'Matcha preparation', 'Preparación del matcha'),
+    photo('nutella-dream-acai', 'Nutella Dream açaí bowl', 'Açaí bowl Nutella Dream'),
+    photo('tropical-paradise-acai', 'Tropical Paradise açaí bowl', 'Açaí bowl Tropical Paradise'),
+    photo('peanut-berry-crunch-acai', 'Peanut Berry Crunch açaí bowl', 'Açaí bowl Peanut Berry Crunch'),
+    photo('group-matchas', 'Our matcha lineup', 'Nuestros matchas'),
+    photo('strawberry-matcha', 'Strawberry Matcha', 'Strawberry Matcha'),
+    photo('mango-matcha', 'Mango Matcha', 'Mango Matcha'),
+    photo('banana-pudding-matcha', 'Banana Pudding Matcha', 'Banana Pudding Matcha'),
+    photo('galeria-2', 'Maybe Café moments', 'Momentos en Maybe Café'),
+    photo('galeria-3', 'Maybe Café moments', 'Momentos en Maybe Café'),
+    photo('galeria-4', 'Maybe Café moments', 'Momentos en Maybe Café'),
+    photo('galeria-5', 'Maybe Café moments', 'Momentos en Maybe Café'),
+  ],
 };

@@ -3,6 +3,7 @@
 // configured or can't be reached, so the site and checkout keep working.
 import { Redis } from '@upstash/redis';
 import { DEFAULT_CATALOG } from '../../src/data/defaultCatalog.js';
+import { withDefaults } from '../../src/data/catalog.js';
 
 const KEY = 'maybe:catalog';
 const HISTORY_KEY = 'maybe:catalog:history';
@@ -24,7 +25,7 @@ export async function getCatalog() {
   if (!redis) return DEFAULT_CATALOG;
   try {
     const stored = await redis.get(KEY);
-    return stored && typeof stored === 'object' ? stored : DEFAULT_CATALOG;
+    return stored && typeof stored === 'object' ? withDefaults(stored, DEFAULT_CATALOG) : DEFAULT_CATALOG;
   } catch (err) {
     console.error('Could not read catalog from Redis, using default:', err);
     return DEFAULT_CATALOG;

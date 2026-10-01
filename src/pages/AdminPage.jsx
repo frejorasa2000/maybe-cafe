@@ -3,6 +3,7 @@ import { adminCall, finalizeNewIds } from '../features/admin/adminApi';
 import ProductsTab from '../components/admin/ProductsTab';
 import OptionsTab from '../components/admin/OptionsTab';
 import HoursTab from '../components/admin/HoursTab';
+import GalleryTab from '../components/admin/GalleryTab';
 import { inputClass } from '../components/admin/fields';
 import logo from '../assets/images/logo.png';
 
@@ -10,6 +11,7 @@ const TABS = [
   ['products', 'Productos'],
   ['options', 'Opciones y toppings'],
   ['hours', 'Horario'],
+  ['gallery', 'Galería'],
 ];
 
 function LoginForm({ onLoggedIn }) {
@@ -177,6 +179,7 @@ export default function AdminPage() {
         {tab === 'products' && <ProductsTab catalog={draft} onChange={setDraft} canUpload={storage.images} />}
         {tab === 'options' && <OptionsTab catalog={draft} onChange={setDraft} />}
         {tab === 'hours' && <HoursTab catalog={draft} onChange={setDraft} />}
+        {tab === 'gallery' && <GalleryTab catalog={draft} onChange={setDraft} canUpload={storage.images} />}
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-espresso/10 bg-paper/95 backdrop-blur">

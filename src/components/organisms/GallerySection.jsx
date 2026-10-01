@@ -1,45 +1,11 @@
 import { useState } from 'react';
+import { useSelector } from 'react-redux';
 import { AnimatePresence, motion } from 'framer-motion';
 import Eyebrow from '../atoms/Eyebrow';
 import Reveal from '../atoms/Reveal';
 import { ChevronIcon } from '../atoms/icons/UiIcons';
 import { useT } from '../../hooks/useT';
-
-import camionFondo from '../../assets/images/camion fondo.jpeg';
-import camion from '../../assets/images/camion.jpg';
-import cliente from '../../assets/images/cliente.jpg';
-import cliente2 from '../../assets/images/cliente2.jpg';
-import groupMatchas from '../../assets/images/group-matchas.jpg';
-import utencilios from '../../assets/images/utencilios.jpg';
-import strawberryMatcha from '../../assets/images/strawberry-matcha.jpg';
-import mangoMatcha from '../../assets/images/mango-matcha.jpg';
-import bananaPuddingMatcha from '../../assets/images/banana-pudding-matcha.jpg';
-import nutellaDream from '../../assets/images/nutella-dream-acai.jpg';
-import peanutBerryCrunch from '../../assets/images/peanut-berry-crunch-acai.jpg';
-import tropicalParadise from '../../assets/images/tropical-paradise-acai.jpg';
-import galeria2 from '../../assets/images/galeria2.jpeg';
-import galeria3 from '../../assets/images/galeria 3.jpeg';
-import galeria4 from '../../assets/images/galeria 4.jpeg';
-import galeria5 from '../../assets/images/galeria 5.jpeg';
-
-const IMAGES = [
-  { src: camionFondo, alt: 'Maybe Café' },
-  { src: camion, alt: 'Maybe Café trailer on opening night' },
-  { src: cliente, alt: 'A customer enjoying Maybe Café' },
-  { src: cliente2, alt: 'Maybe Café owner at the trailer' },
-  { src: utencilios, alt: 'Matcha preparation' },
-  { src: nutellaDream, alt: 'Nutella Dream açaí bowl' },
-  { src: tropicalParadise, alt: 'Tropical Paradise açaí bowl' },
-  { src: peanutBerryCrunch, alt: 'Peanut Berry Crunch açaí bowl' },
-  { src: groupMatchas, alt: 'Our matcha lineup' },
-  { src: strawberryMatcha, alt: 'Strawberry Matcha' },
-  { src: mangoMatcha, alt: 'Mango Matcha' },
-  { src: bananaPuddingMatcha, alt: 'Banana Pudding Matcha' },
-  { src: galeria2, alt: 'Maybe Café moments' },
-  { src: galeria3, alt: 'Maybe Café moments' },
-  { src: galeria4, alt: 'Maybe Café moments' },
-  { src: galeria5, alt: 'Maybe Café moments' },
-];
+import { selectGallery } from '../../features/catalog/catalogSlice';
 
 const variants = {
   enter: (dir) => ({ x: dir > 0 ? '30%' : '-30%', opacity: 0 }),
@@ -48,9 +14,11 @@ const variants = {
 };
 
 export default function GallerySection() {
-  const { t } = useT();
+  const { t, lang } = useT();
+  // Photos (and their order) are managed from /admin → Galería.
+  const IMAGES = useSelector(selectGallery);
   const [[index, direction], setState] = useState([0, 0]);
-  const active = ((index % IMAGES.length) + IMAGES.length) % IMAGES.length;
+  const active = IMAGES.length ? ((index % IMAGES.length) + IMAGES.length) % IMAGES.length : 0;
 
   function paginate(dir) {
     setState([index + dir, dir]);
@@ -66,6 +34,8 @@ export default function GallerySection() {
     else if (power > 8000 || info.offset.x > 70) paginate(-1);
   }
 
+  if (IMAGES.length === 0) return null;
+
   return (
     <section id="gallery" className="border-t border-espresso/10 py-24 sm:py-32">
       <div className="mx-auto max-w-4xl px-6 sm:px-10">
@@ -80,8 +50,8 @@ export default function GallerySection() {
             <AnimatePresence initial={false} custom={direction} mode="wait">
               <motion.img
                 key={active}
-                src={IMAGES[active].src}
-                alt={IMAGES[active].alt}
+                src={IMAGES[active].image}
+                alt={IMAGES[active].alt[lang]}
                 custom={direction}
                 variants={variants}
                 initial="enter"
@@ -119,7 +89,7 @@ export default function GallerySection() {
           <div className="mt-6 flex justify-center gap-2">
             {IMAGES.map((img, i) => (
               <button
-                key={img.src}
+                key={img.id}
                 type="button"
                 onClick={() => goTo(i)}
                 aria-label={`Go to photo ${i + 1}`}

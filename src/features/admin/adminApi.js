@@ -18,24 +18,27 @@ export async function adminCall(action, body = {}) {
   return data;
 }
 
-// Center-crops to a square and re-encodes as a ~100 KB JPEG, matching the
-// square cards on the menu and keeping uploads far under the server limit.
-export function resizeToSquareJpeg(file, size = 900) {
+// Re-encodes a photo as a compressed JPEG before upload, keeping uploads far
+// under the server limit. `square` center-crops (menu cards are square);
+// otherwise the whole photo is kept and just scaled so its longest side is
+// at most `max` px (gallery photos can be landscape or portrait).
+function resizeImage(file, { square, max }) {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      const side = Math.min(img.naturalWidth, img.naturalHeight);
-      const sx = (img.naturalWidth - side) / 2;
-      const sy = (img.naturalHeight - side) / 2;
-      const target = Math.min(size, side);
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+      const side = Math.min(w, h);
+      const src = square ? { x: (w - side) / 2, y: (h - side) / 2, w: side, h: side } : { x: 0, y: 0, w, h };
+      const scale = Math.min(1, max / Math.max(src.w, src.h));
       const canvas = document.createElement('canvas');
-      canvas.width = target;
-      canvas.height = target;
+      canvas.width = Math.round(src.w * scale);
+      canvas.height = Math.round(src.h * scale);
       const ctx = canvas.getContext('2d');
       ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, target, target);
-      ctx.drawImage(img, sx, sy, side, side, 0, 0, target, target);
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, src.x, src.y, src.w, src.h, 0, 0, canvas.width, canvas.height);
       URL.revokeObjectURL(url);
       resolve(canvas.toDataURL('image/jpeg', 0.85));
     };
@@ -45,6 +48,16 @@ export function resizeToSquareJpeg(file, size = 900) {
     };
     img.src = url;
   });
+}
+
+export const resizeToSquareJpeg = (file) => resizeImage(file, { square: true, max: 900 });
+export const resizeToJpeg = (file) => resizeImage(file, { square: false, max: 1600 });
+
+// Resizes and uploads one photo; returns its public URL.
+export async function uploadPhoto(file, name, { square }) {
+  const dataUrl = square ? await resizeToSquareJpeg(file) : await resizeToJpeg(file);
+  const { url } = await adminCall('upload', { dataUrl, name });
+  return url;
 }
 
 // New products/options get a permanent id from their name right before the

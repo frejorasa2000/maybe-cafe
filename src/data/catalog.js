@@ -102,8 +102,9 @@ export function slugify(text) {
 
 const ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
-// Images are either bundled ones (/menu/...) or uploads to Vercel Blob.
-const IMAGE_RE = /^(\/menu\/[\w.-]+|https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/[\w./-]+)$/i;
+// Images are either bundled ones (/menu/..., /gallery/...) or uploads to Vercel Blob.
+const IMAGE_RE = /^(\/(menu|gallery)\/[\w.-]+|https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/[\w./-]+)$/i;
+const MAX_GALLERY = 60;
 
 function text(value, max) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -204,5 +205,28 @@ export function validateCatalog(input) {
     return { error: 'Los minutos antes del cierre deben ser entre 0 y 120.' };
   }
 
-  return { catalog: { version: Number(input.version) || 0, products, optionGroups, hours, lastOrderMinutes } };
+  // Gallery
+  if (!Array.isArray(input.gallery) || input.gallery.length > MAX_GALLERY) {
+    return { error: `La galería puede tener hasta ${MAX_GALLERY} fotos.` };
+  }
+  const seenPhotos = new Set();
+  const gallery = [];
+  for (const g of input.gallery) {
+    const id = text(g?.id, 60);
+    if (!ID_RE.test(id) || seenPhotos.has(id)) return { error: 'Hay una foto de la galería con un identificador inválido.' };
+    seenPhotos.add(id);
+    const image = text(g.image, 400);
+    if (!IMAGE_RE.test(image)) return { error: 'Hay una foto de la galería sin imagen válida.' };
+    // The description is optional for the owner; fall back to the name.
+    const alt = { en: text(g.alt?.en, 120) || 'Maybe Café', es: text(g.alt?.es, 120) || 'Maybe Café' };
+    gallery.push({ id, image, alt, active: g.active !== false });
+  }
+
+  return { catalog: { version: Number(input.version) || 0, products, optionGroups, hours, lastOrderMinutes, gallery } };
+}
+
+// Catalogs saved before a section existed (e.g. the gallery) get the default
+// for that section, so older saved data keeps working.
+export function withDefaults(catalog, defaults) {
+  return { ...catalog, gallery: Array.isArray(catalog.gallery) ? catalog.gallery : defaults.gallery };
 }

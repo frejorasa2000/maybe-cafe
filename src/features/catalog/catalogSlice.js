@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { DEFAULT_CATALOG } from '../../data/defaultCatalog';
-import { menuFromCatalog } from '../../data/catalog';
+import { menuFromCatalog, withDefaults } from '../../data/catalog';
 
 // The menu/options/hours the owner edits in /admin. Starts with the bundled
 // default so the page renders instantly, then swaps in the live copy.
@@ -22,7 +22,7 @@ const catalogSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchCatalog.fulfilled, (state, action) => {
-        state.data = action.payload;
+        state.data = withDefaults(action.payload, DEFAULT_CATALOG);
         state.loaded = true;
       })
       // The server falls back to the same default when its database is
@@ -37,6 +37,17 @@ export default catalogSlice.reducer;
 
 export const selectCatalog = (state) => state.catalog.data;
 export const selectCatalogLoaded = (state) => state.catalog.loaded;
+
+// Visible gallery photos, in order (memoized like selectMenu below).
+let lastGallerySource = null;
+let lastGallery = [];
+export function selectGallery(state) {
+  if (state.catalog.data.gallery !== lastGallerySource) {
+    lastGallerySource = state.catalog.data.gallery;
+    lastGallery = (lastGallerySource || []).filter((g) => g.active);
+  }
+  return lastGallery;
+}
 
 // Memoized by catalog identity so components don't re-render on every store change.
 let lastCatalog = null;

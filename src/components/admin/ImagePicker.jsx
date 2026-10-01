@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { adminCall, resizeToSquareJpeg } from '../../features/admin/adminApi';
+import { uploadPhoto } from '../../features/admin/adminApi';
 import { SmallButton } from './fields';
 
 export default function ImagePicker({ value, onChange, name, disabled }) {
@@ -14,9 +14,7 @@ export default function ImagePicker({ value, onChange, name, disabled }) {
     setError(null);
     setBusy(true);
     try {
-      const dataUrl = await resizeToSquareJpeg(file);
-      const { url } = await adminCall('upload', { dataUrl, name });
-      onChange(url);
+      onChange(await uploadPhoto(file, name, { square: true }));
     } catch (err) {
       setError(err.message);
     } finally {
