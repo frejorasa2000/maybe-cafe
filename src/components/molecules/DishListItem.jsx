@@ -3,7 +3,6 @@ import TiltCard from '../atoms/TiltCard';
 import TagPill from '../atoms/TagPill';
 import Reveal from '../atoms/Reveal';
 import { addItem, openCustomize } from '../../features/cart/cartSlice';
-import { getProductGroups } from '../../data/menuOptions';
 import { useT } from '../../hooks/useT';
 
 export default function DishListItem({ dish, lang, canOrder = true, delay = 0 }) {
@@ -36,7 +35,7 @@ export default function DishListItem({ dish, lang, canOrder = true, delay = 0 })
                 data-cursor-hover
                 disabled={!canOrder}
                 onClick={() =>
-                  getProductGroups(dish.id).length > 0
+                  dish.hasOptions
                     ? dispatch(openCustomize({ productId: dish.id, sizeId: size.id }))
                     : dispatch(addItem({ dish, size }))
                 }

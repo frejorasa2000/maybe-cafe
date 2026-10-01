@@ -44,10 +44,10 @@ cuando lleguen reseñas nuevas.
 
 ## Pedidos online (Square)
 
-Los 16 productos de "Favoritos" (`src/data/menu.js`) se pueden agregar al
-carrito. Los precios reales (de las fotos del menú) viven en
-`src/data/menuPricing.js`: bebidas en 16 oz / 20 oz, açaí y mini pancakes con
-un solo precio. Si cambian, se actualizan solo ahí (el servidor usa esa tabla). Las fotos de `src/assets/images/menu/` están normalizadas (mismo cuadrado y fondo); los originales están en `_originals/`.
+Los productos de "Favoritos" se pueden agregar al carrito. Productos, precios,
+opciones (leche, syrup, cold foam, toppings) y horario se editan desde el
+panel `/admin` (ver más abajo) — el servidor recalcula cada cobro con esos
+mismos datos.
 
 Flujo: carrito (Redux, `src/features/cart/`) → botón del carrito en el
 header → checkout (`CheckoutModal.jsx`) con el Web Payments SDK de Square
@@ -108,13 +108,53 @@ esté configurado). La lógica compartida con Square vive en `api/_lib/square.js
 
 ### Horario de pedidos en línea
 
-`src/data/businessHours.js` define cuándo se aceptan pedidos (hora de Nueva
-York, sin importar dónde esté el cliente) y deja de aceptarlos
-`LAST_ORDER_MINUTES_BEFORE_CLOSE` (15) minutos antes de cerrar. Fuera de
-horario, los botones de agregar y pagar se desactivan con un aviso de cuándo
-abrimos, y `api/create-payment.js` rechaza el pedido igual (no se puede saltar
-desde el navegador). Si cambia el horario, actualízalo ahí **y** en
-`src/i18n/content.js` (`visit.hours`), que es el texto que se muestra.
+El horario se edita en `/admin` → Horario (hora de Nueva York, sin importar
+dónde esté el cliente). Los pedidos se dejan de aceptar unos minutos antes de
+cerrar (15 por defecto, también editable). Fuera de horario, los botones de
+agregar y pagar se desactivan con un aviso de cuándo abrimos, y
+`api/create-payment.js` rechaza el pedido igual (no se puede saltar desde el
+navegador). La lógica está en `src/data/businessHours.js`. El mismo horario se
+muestra en la sección "Visit/Visítanos".
+
+## Panel de administración (`/admin`)
+
+El dueño entra a `https://<dominio>/admin` con una contraseña y puede, sin
+desplegar:
+
+- **Productos**: agregar, editar (nombre, categoría, descripción en inglés y
+  español, foto, tamaños y precios, qué opciones ofrece), ocultar
+  temporalmente, cambiar el orden o eliminar.
+- **Opciones y toppings**: leches, syrups, cold foams y toppings — nombre en
+  los dos idiomas, precio extra, disponible o no, y cuántos se pueden elegir.
+- **Horario**: días abiertos, horas y minutos antes del cierre.
+
+Los cambios se ven en la página en segundos (caché de 10 s).
+
+Cómo funciona:
+
+- `src/data/defaultCatalog.js` es el menú inicial. Se usa hasta el primer
+  guardado y como respaldo si la base de datos no responde.
+- `src/data/catalog.js` tiene la lógica compartida por el sitio, el panel y el
+  servidor (precios, opciones, validación de lo que se guarda).
+- `api/catalog.js` entrega el catálogo público; `api/admin.js` maneja login,
+  guardado y subida de fotos; `api/_lib/catalogStore.js` guarda el catálogo en
+  **Upstash Redis** (con historial de las últimas 20 versiones en
+  `maybe:catalog:history`, por si hay que deshacer algo) y las fotos van a
+  **Vercel Blob** (se recortan en cuadrado y se comprimen en el navegador).
+- Si dos personas guardan a la vez, la segunda recibe un aviso para recargar en
+  lugar de sobrescribir los cambios de la otra.
+
+Variables de entorno en Vercel:
+
+- `ADMIN_PASSWORD` — la contraseña del panel. Cambiarla cierra todas las
+  sesiones abiertas.
+- `KV_REST_API_URL` / `KV_REST_API_TOKEN` — las crea Vercel al conectar
+  Upstash Redis (Storage → Upstash for Redis) al proyecto.
+- `BLOB_READ_WRITE_TOKEN` — la crea Vercel al conectar un Blob store.
+
+Sin Redis el sitio sigue funcionando con el menú inicial, pero el panel no
+puede guardar. `src/assets/images/menu/` ya no se usa: las fotos iniciales
+están en `public/menu/`.
 
 ### Tiempo estimado del pedido
 
@@ -146,11 +186,6 @@ traducen (se muestran en su idioma original, igual que hace Google).
   (arrastrar con el dedo en celular, o con el mouse) que da la vuelta al
   llegar al final. Usa las fotos que ya teníamos; se puede ampliar la lista
   de imágenes en el propio archivo.
-
-## Horario
-
-Se edita en `src/i18n/content.js`, dentro de `visit.hours` de cada idioma.
-El día actual se resalta en automático en la sección "Visit/Visítanos".
 
 ## Estructura
 

@@ -1,13 +1,15 @@
+import { useSelector } from 'react-redux';
 import Eyebrow from '../atoms/Eyebrow';
 import Reveal from '../atoms/Reveal';
 import DishListItem from '../molecules/DishListItem';
-import { MENU } from '../../data/menu';
+import { selectMenu } from '../../features/catalog/catalogSlice';
 import { useT } from '../../hooks/useT';
 import { useOrderingStatus } from '../../hooks/useOrderingStatus';
 
 export default function MenuSection() {
   const { t, lang } = useT();
   const ordering = useOrderingStatus();
+  const menu = useSelector(selectMenu);
 
   return (
     <section id="favorites" className="border-t border-espresso/10 py-24 sm:py-32">
@@ -18,14 +20,14 @@ export default function MenuSection() {
           <p className="mt-4 font-serif text-lg text-espresso/60 italic sm:text-xl">{t.favorites.sub}</p>
         </Reveal>
 
-        {!ordering.open && (
+        {!ordering.open && !ordering.loading && (
           <p className="mx-auto mb-8 max-w-xl rounded-xl border border-gold/30 bg-gold/10 px-4 py-3 text-center text-sm text-gold-soft">
             {t.ordering.closedNotice(ordering.nextOpen)}
           </p>
         )}
 
         <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
-          {MENU.map((dish, i) => (
+          {menu.map((dish, i) => (
             <DishListItem key={dish.id} dish={dish} lang={lang} canOrder={ordering.open} delay={(i % 2) * 0.08} />
           ))}
         </div>

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import { PRICES, buildSizes } from '../src/data/menuPricing.js';
-import { resolveSelections } from '../src/data/menuOptions.js';
+import { buildSizes, getProduct, resolveSelections } from '../src/data/catalog.js';
+import { getCatalog } from './_lib/catalogStore.js';
 import { lineItemLabel } from './_lib/square.js';
 import { estimateMinutes } from '../src/data/estimatedTime.js';
 import { getOrderingStatus } from '../src/data/businessHours.js';
@@ -21,20 +21,21 @@ function squareHeaders(accessToken) {
   };
 }
 
-// Builds real Order line items from our own price table instead of trusting
+// Builds real Order line items from the stored catalog instead of trusting
 // any name/price/amount sent by the browser — the client only tells us what
-// was ordered (productId + size + quantity).
-function buildLineItems(items) {
+// was ordered (productId + size + options + quantity).
+function buildLineItems(catalog, items) {
   const lineItems = [];
   for (const item of items || []) {
     const quantity = Number(item.quantity);
-    const product = Object.hasOwn(PRICES, item.productId) ? PRICES[item.productId] : null;
+    const product = typeof item.productId === 'string' ? getProduct(catalog, item.productId) : null;
     if (!product || !Number.isInteger(quantity) || quantity < 1 || quantity > MAX_QUANTITY_PER_LINE) {
       return { error: 'Invalid item in order.' };
     }
-    const size = buildSizes(item.productId).find((s) => s.id === item.sizeId);
+    if (!product.active) return { error: `${product.name} is no longer available. Please remove it from your cart.` };
+    const size = buildSizes(product).find((s) => s.id === item.sizeId);
     if (!size) return { error: `Invalid size for ${product.name}` };
-    const { chosen, error } = resolveSelections(item.productId, item.selections);
+    const { chosen, error } = resolveSelections(catalog, item.productId, item.selections);
     if (error) return { error };
     lineItems.push({
       name: `${product.name} (${size.label.en})`,
@@ -213,7 +214,8 @@ export default async function handler(req, res) {
 
   // Enforced here (not just in the UI) so nobody can place an order while
   // the truck is closed by calling this endpoint directly.
-  if (!getOrderingStatus().open) {
+  const catalog = await getCatalog();
+  if (!getOrderingStatus(new Date(), catalog).open) {
     res.status(403).json({ error: "We're closed for online orders right now. Please check our hours and try again.", code: 'CLOSED' });
     return;
   }
@@ -225,7 +227,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  const built = buildLineItems(items);
+  const built = buildLineItems(catalog, items);
   if (built.error) {
     res.status(400).json({ error: built.error });
     return;

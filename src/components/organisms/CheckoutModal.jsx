@@ -273,7 +273,7 @@ export default function CheckoutModal() {
               ) : (
                 <form onSubmit={handleSubmit}>
                   <h2 className="font-display text-2xl uppercase text-espresso">{t.checkout.title}</h2>
-                  {!ordering.open && (
+                  {!ordering.open && !ordering.loading && (
                     <p className="mt-2 rounded-lg bg-wine/10 px-3 py-2 text-xs text-wine-soft">{t.ordering.closedNotice(ordering.nextOpen)}</p>
                   )}
 

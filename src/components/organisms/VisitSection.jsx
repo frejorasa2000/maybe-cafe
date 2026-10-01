@@ -7,14 +7,17 @@ import { PhoneIcon, PinIcon, ClockIcon } from '../atoms/icons/UiIcons';
 import { InstagramIcon, FacebookIcon, TikTokIcon } from '../atoms/icons/SocialIcons';
 import { ADDRESS, PHONE, MAPS_URL, SOCIAL } from '../../data/siteInfo';
 import { useT } from '../../hooks/useT';
+import { useSelector } from 'react-redux';
+import { selectCatalog } from '../../features/catalog/catalogSlice';
+import { localWeekday } from '../../data/businessHours';
 
-const TODAY_INDEX = (() => {
-  const jsDay = new Date().getDay(); // 0 = Sunday
-  return jsDay === 0 ? 6 : jsDay - 1; // rotate so 0 = Monday
-})();
+// Catalog hours are keyed 0 = Sunday; the list reads Monday → Sunday.
+const WEEK_ORDER = [1, 2, 3, 4, 5, 6, 0];
 
 export default function VisitSection() {
   const { t } = useT();
+  const catalog = useSelector(selectCatalog);
+  const today = localWeekday();
 
   return (
     <section id="visit" className="border-t border-espresso/10 py-24 sm:py-32">
@@ -31,9 +34,18 @@ export default function VisitSection() {
               <ClockIcon className="text-lg" />
               <h3 className="font-display text-sm tracking-[0.16em] uppercase">{t.visit.hoursTitle}</h3>
             </div>
-            {t.visit.hours.map((h, i) => (
-              <HoursRow key={h.day} {...h} isToday={i === TODAY_INDEX} />
-            ))}
+            {WEEK_ORDER.map((day) => {
+              const h = catalog.hours[day];
+              return (
+                <HoursRow
+                  key={day}
+                  day={t.visit.dayNames[day]}
+                  hours={h ? `${t.visit.formatTime(h.open)} – ${t.visit.formatTime(h.close)}` : t.visit.closedLabel}
+                  closed={!h}
+                  isToday={day === today}
+                />
+              );
+            })}
             <a
               href={MAPS_URL}
               target="_blank"

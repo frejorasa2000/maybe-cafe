@@ -85,15 +85,13 @@ export const content = {
       phoneLabel: 'Phone',
       directionsBtn: 'Get Directions',
       callBtn: 'Call Now',
-      hours: [
-        { day: 'Monday', hours: 'Closed', closed: true },
-        { day: 'Tuesday', hours: 'Closed', closed: true },
-        { day: 'Wednesday', hours: '8 AM – 6 PM', closed: false },
-        { day: 'Thursday', hours: '8 AM – 6 PM', closed: false },
-        { day: 'Friday', hours: '8 AM – 7 PM', closed: false },
-        { day: 'Saturday', hours: '8 AM – 7 PM', closed: false },
-        { day: 'Sunday', hours: '8 AM – 7 PM', closed: false },
-      ],
+      // Hours themselves come from the catalog (editable in /admin).
+      dayNames: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      closedLabel: 'Closed',
+      formatTime: (hhmm) => {
+        const [h, m] = hhmm.split(':').map(Number);
+        return `${h % 12 || 12}${m ? ':' + String(m).padStart(2, '0') : ''} ${h < 12 ? 'AM' : 'PM'}`;
+      },
     },
     reservations: {
       eyebrow: 'Reservations',
@@ -285,15 +283,12 @@ export const content = {
       phoneLabel: 'Teléfono',
       directionsBtn: 'Cómo llegar',
       callBtn: 'Llamar ahora',
-      hours: [
-        { day: 'Lunes', hours: 'Cerrado', closed: true },
-        { day: 'Martes', hours: 'Cerrado', closed: true },
-        { day: 'Miércoles', hours: '8:00 a.m. – 6:00 p.m.', closed: false },
-        { day: 'Jueves', hours: '8:00 a.m. – 6:00 p.m.', closed: false },
-        { day: 'Viernes', hours: '8:00 a.m. – 7:00 p.m.', closed: false },
-        { day: 'Sábado', hours: '8:00 a.m. – 7:00 p.m.', closed: false },
-        { day: 'Domingo', hours: '8:00 a.m. – 7:00 p.m.', closed: false },
-      ],
+      dayNames: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+      closedLabel: 'Cerrado',
+      formatTime: (hhmm) => {
+        const [h, m] = hhmm.split(':').map(Number);
+        return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h < 12 ? 'a.m.' : 'p.m.'}`;
+      },
     },
     reservations: {
       eyebrow: 'Reservaciones',

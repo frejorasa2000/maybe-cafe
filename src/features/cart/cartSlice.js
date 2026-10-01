@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { estimateMinutes } from '../../data/estimatedTime';
-import { optionsPrice, resolveSelections } from '../../data/menuOptions';
+import { optionsPrice } from '../../data/catalog';
 
 // Same product + size + options stack into one line; different options get
 // their own line so each drink keeps its own milk/syrup/foam/toppings.
@@ -17,10 +17,10 @@ const cartSlice = createSlice({
     items: [], // { id, productId, name, tag, image, sizeId, sizeLabel, selections, options, price, quantity }
   },
   reducers: {
+    // `chosen` is the already-validated output of resolveSelections() against
+    // the live catalog (CustomizeModal does that); the server re-checks it.
     addItem(state, action) {
-      const { dish, size, selections = {} } = action.payload;
-      const { chosen, error } = resolveSelections(dish.id, selections);
-      if (error) return;
+      const { dish, size, selections = {}, chosen = [] } = action.payload;
       const id = lineId(dish.id, size.id, chosen);
       const existing = state.items.find((item) => item.id === id);
       if (existing) {

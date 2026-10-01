@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
 import { addItem, closeCustomize } from '../../features/cart/cartSlice';
-import { MENU } from '../../data/menu';
-import { defaultSelections, getProductGroups, optionsPrice, resolveSelections } from '../../data/menuOptions';
+import { selectCatalog, selectMenu } from '../../features/catalog/catalogSlice';
+import { defaultSelections, getProductGroups, optionsPrice, resolveSelections } from '../../data/catalog';
 import { CloseIcon } from '../atoms/icons/UiIcons';
 import Button from '../atoms/Button';
 import { useT } from '../../hooks/useT';
@@ -15,16 +15,18 @@ export default function CustomizeModal() {
   const { t, lang } = useT();
   const dispatch = useDispatch();
   const customizing = useSelector((s) => s.cart.customizing);
-  const dish = customizing && MENU.find((d) => d.id === customizing.productId);
+  const catalog = useSelector(selectCatalog);
+  const menu = useSelector(selectMenu);
+  const dish = customizing && menu.find((d) => d.id === customizing.productId);
   const size = dish?.sizes.find((s) => s.id === customizing.sizeId);
-  const groups = dish ? getProductGroups(dish.id) : [];
+  const groups = dish ? getProductGroups(catalog, dish.id) : [];
   const [selections, setSelections] = useState({});
 
   useEffect(() => {
-    if (customizing) setSelections(defaultSelections(customizing.productId));
-  }, [customizing]);
+    if (customizing) setSelections(defaultSelections(catalog, customizing.productId));
+  }, [customizing, catalog]);
 
-  const resolved = dish ? resolveSelections(dish.id, selections) : { chosen: [] };
+  const resolved = dish ? resolveSelections(catalog, dish.id, selections) : { chosen: [] };
   const total = size ? size.price + optionsPrice(resolved.chosen || []) : 0;
 
   function toggle(group, optionId) {
@@ -43,7 +45,7 @@ export default function CustomizeModal() {
 
   function handleAdd() {
     if (resolved.error) return;
-    dispatch(addItem({ dish, size, selections }));
+    dispatch(addItem({ dish, size, selections, chosen: resolved.chosen }));
     dispatch(closeCustomize());
   }
 

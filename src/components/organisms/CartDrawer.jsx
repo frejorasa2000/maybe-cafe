@@ -122,7 +122,7 @@ export default function CartDrawer() {
                   <span className="font-serif text-xl text-espresso">${total.toFixed(2)}</span>
                 </div>
                 <p className="mb-4 text-xs text-espresso/45">{t.cart.estimatedTime(estimatedMinutes)}</p>
-                {!ordering.open && <p className="mb-3 text-xs text-wine-soft">{t.ordering.closedNotice(ordering.nextOpen)}</p>}
+                {!ordering.open && !ordering.loading && <p className="mb-3 text-xs text-wine-soft">{t.ordering.closedNotice(ordering.nextOpen)}</p>}
                 <Button
                   as="button"
                   type="button"
