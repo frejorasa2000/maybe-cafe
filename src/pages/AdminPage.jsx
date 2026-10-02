@@ -3,7 +3,7 @@ import { adminCall, finalizeNewIds } from '../features/admin/adminApi';
 import ProductsTab from '../components/admin/ProductsTab';
 import OptionsTab from '../components/admin/OptionsTab';
 import HoursTab from '../components/admin/HoursTab';
-import GalleryTab from '../components/admin/GalleryTab';
+import PhotoListTab, { PHOTO_LISTS } from '../components/admin/PhotoListTab';
 import { inputClass } from '../components/admin/fields';
 import logo from '../assets/images/logo.png';
 
@@ -11,6 +11,7 @@ const TABS = [
   ['products', 'Productos'],
   ['options', 'Opciones y toppings'],
   ['hours', 'Horario'],
+  ['menuBoards', 'Imágenes del menú'],
   ['gallery', 'Galería'],
 ];
 
@@ -179,7 +180,12 @@ export default function AdminPage() {
         {tab === 'products' && <ProductsTab catalog={draft} onChange={setDraft} canUpload={storage.images} />}
         {tab === 'options' && <OptionsTab catalog={draft} onChange={setDraft} />}
         {tab === 'hours' && <HoursTab catalog={draft} onChange={setDraft} />}
-        {tab === 'gallery' && <GalleryTab catalog={draft} onChange={setDraft} canUpload={storage.images} />}
+        {tab === 'menuBoards' && (
+          <PhotoListTab key="menuBoards" config={PHOTO_LISTS.menuBoards} catalog={draft} onChange={setDraft} canUpload={storage.images} />
+        )}
+        {tab === 'gallery' && (
+          <PhotoListTab key="gallery" config={PHOTO_LISTS.gallery} catalog={draft} onChange={setDraft} canUpload={storage.images} />
+        )}
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-espresso/10 bg-paper/95 backdrop-blur">

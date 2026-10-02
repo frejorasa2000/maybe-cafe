@@ -1,22 +1,17 @@
+import { useSelector } from 'react-redux';
 import Eyebrow from '../atoms/Eyebrow';
 import Reveal from '../atoms/Reveal';
 import { useLightbox } from './Lightbox';
 import { useT } from '../../hooks/useT';
-import seasonalMenu from '../../assets/images/menu de temporada.jpg';
-import menu1 from '../../assets/images/menu-1.jpg';
-import menu2 from '../../assets/images/menu-2.jpg';
-import toppings from '../../assets/images/toppings.jpg';
-
-const PAGES = [
-  { img: seasonalMenu, alt: 'Maybe Café fall menu — pumpkin spice latte, pumpkin pie latte, cinnamon roll latte, crème brûlée latte, pumpkin spice chai, apple cloud refresher and pumpkin cinnamon roll mini pancakes' },
-  { img: menu1, alt: 'Maybe Café menu — coffee, matcha, and other drinks' },
-  { img: menu2, alt: 'Maybe Café menu — açaí bowls, strawberries & cream bowls, and mini pancakes' },
-  { img: toppings, alt: 'Maybe Café topping choices' },
-];
+import { selectMenuBoards } from '../../features/catalog/catalogSlice';
 
 export default function FullMenuSection() {
-  const { t } = useT();
+  const { t, lang } = useT();
   const openLightbox = useLightbox();
+  // The printed menu boards (and their order) are managed from /admin → Imágenes del menú.
+  const pages = useSelector(selectMenuBoards);
+
+  if (pages.length === 0) return null;
 
   return (
     <section id="menu" className="border-t border-espresso/10 py-24 sm:py-32">
@@ -28,17 +23,17 @@ export default function FullMenuSection() {
         </Reveal>
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {PAGES.map((page, i) => (
-            <Reveal key={page.img} delay={i * 0.08}>
+          {pages.map((page, i) => (
+            <Reveal key={page.id} delay={i * 0.08}>
               <button
                 type="button"
-                onClick={() => openLightbox(page.img, page.alt)}
+                onClick={() => openLightbox(page.image, page.alt[lang])}
                 data-cursor-hover
                 className="block w-full overflow-hidden rounded-xl border border-espresso/10 transition-colors hover:border-gold/50"
               >
                 {/* contain (not cover): the boards have slightly different proportions
                     and cropping would cut off item names and prices */}
-                <img src={page.img} alt={page.alt} className="aspect-[2/3] w-full bg-paper-2 object-contain" loading="lazy" />
+                <img src={page.image} alt={page.alt[lang]} className="aspect-[2/3] w-full bg-paper-2 object-contain" loading="lazy" />
               </button>
             </Reveal>
           ))}

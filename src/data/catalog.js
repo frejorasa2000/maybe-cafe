@@ -102,9 +102,11 @@ export function slugify(text) {
 
 const ID_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
-// Images are either bundled ones (/menu/..., /gallery/...) or uploads to Vercel Blob.
-const IMAGE_RE = /^(\/(menu|gallery)\/[\w.-]+|https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/[\w./-]+)$/i;
+// Images are either bundled ones (/menu/..., /gallery/..., /menu-boards/...)
+// or uploads to Vercel Blob.
+const IMAGE_RE = /^(\/(menu|gallery|menu-boards)\/[\w.-]+|https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\/[\w./-]+)$/i;
 const MAX_GALLERY = 60;
+const MAX_MENU_BOARDS = 12;
 
 function text(value, max) {
   return typeof value === 'string' ? value.trim().slice(0, max) : '';
@@ -205,28 +207,49 @@ export function validateCatalog(input) {
     return { error: 'Los minutos antes del cierre deben ser entre 0 y 120.' };
   }
 
-  // Gallery
-  if (!Array.isArray(input.gallery) || input.gallery.length > MAX_GALLERY) {
-    return { error: `La galería puede tener hasta ${MAX_GALLERY} fotos.` };
-  }
-  const seenPhotos = new Set();
-  const gallery = [];
-  for (const g of input.gallery) {
-    const id = text(g?.id, 60);
-    if (!ID_RE.test(id) || seenPhotos.has(id)) return { error: 'Hay una foto de la galería con un identificador inválido.' };
-    seenPhotos.add(id);
-    const image = text(g.image, 400);
-    if (!IMAGE_RE.test(image)) return { error: 'Hay una foto de la galería sin imagen válida.' };
-    // The description is optional for the owner; fall back to the name.
-    const alt = { en: text(g.alt?.en, 120) || 'Maybe Café', es: text(g.alt?.es, 120) || 'Maybe Café' };
-    gallery.push({ id, image, alt, active: g.active !== false });
-  }
+  const gallery = validatePhotoList(input.gallery, MAX_GALLERY, 'La galería');
+  if (gallery.error) return gallery;
+  const menuBoards = validatePhotoList(input.menuBoards, MAX_MENU_BOARDS, 'Las imágenes del menú');
+  if (menuBoards.error) return menuBoards;
 
-  return { catalog: { version: Number(input.version) || 0, products, optionGroups, hours, lastOrderMinutes, gallery } };
+  return {
+    catalog: {
+      version: Number(input.version) || 0,
+      products,
+      optionGroups,
+      hours,
+      lastOrderMinutes,
+      gallery: gallery.list,
+      menuBoards: menuBoards.list,
+    },
+  };
+}
+
+// Gallery photos and menu boards share the same shape:
+// { id, image, alt: { en, es }, active }.
+function validatePhotoList(input, max, name) {
+  if (!Array.isArray(input) || input.length > max) return { error: `${name} puede tener hasta ${max} imágenes.` };
+  const seen = new Set();
+  const list = [];
+  for (const g of input) {
+    const id = text(g?.id, 60);
+    if (!ID_RE.test(id) || seen.has(id)) return { error: `${name}: hay una imagen con un identificador inválido.` };
+    seen.add(id);
+    const image = text(g.image, 400);
+    if (!IMAGE_RE.test(image)) return { error: `${name}: hay una imagen sin archivo válido.` };
+    // The description is optional for the owner; fall back to the name.
+    const alt = { en: text(g.alt?.en, 250) || 'Maybe Café', es: text(g.alt?.es, 250) || 'Maybe Café' };
+    list.push({ id, image, alt, active: g.active !== false });
+  }
+  return { list };
 }
 
 // Catalogs saved before a section existed (e.g. the gallery) get the default
 // for that section, so older saved data keeps working.
 export function withDefaults(catalog, defaults) {
-  return { ...catalog, gallery: Array.isArray(catalog.gallery) ? catalog.gallery : defaults.gallery };
+  return {
+    ...catalog,
+    gallery: Array.isArray(catalog.gallery) ? catalog.gallery : defaults.gallery,
+    menuBoards: Array.isArray(catalog.menuBoards) ? catalog.menuBoards : defaults.menuBoards,
+  };
 }

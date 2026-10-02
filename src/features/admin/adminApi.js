@@ -50,12 +50,11 @@ function resizeImage(file, { square, max }) {
   });
 }
 
-export const resizeToSquareJpeg = (file) => resizeImage(file, { square: true, max: 900 });
-export const resizeToJpeg = (file) => resizeImage(file, { square: false, max: 1600 });
-
-// Resizes and uploads one photo; returns its public URL.
-export async function uploadPhoto(file, name, { square }) {
-  const dataUrl = square ? await resizeToSquareJpeg(file) : await resizeToJpeg(file);
+// Resizes and uploads one photo; returns its public URL. Product photos are
+// square 900 px; gallery photos keep their shape at up to 1600 px; menu
+// boards go up to 2000 px so their small print stays readable when zoomed.
+export async function uploadPhoto(file, name, { square = false, max = square ? 900 : 1600 } = {}) {
+  const dataUrl = await resizeImage(file, { square, max });
   const { url } = await adminCall('upload', { dataUrl, name });
   return url;
 }

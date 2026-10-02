@@ -26,6 +26,7 @@ const product = (id, name, category, tag, en, es, sizes, groups) => ({
 const drink = (small, large) => ({ '16oz': small, '20oz': large });
 
 const photo = (id, en, es) => ({ id, image: `/gallery/${id}.jpg`, alt: { en, es }, active: true });
+const board = (id, en, es) => ({ id, image: `/menu-boards/${id}.jpg`, alt: { en, es }, active: true });
 
 export const DEFAULT_CATALOG = {
   version: 0,
@@ -197,5 +198,12 @@ export const DEFAULT_CATALOG = {
     photo('galeria-3', 'Maybe Café moments', 'Momentos en Maybe Café'),
     photo('galeria-4', 'Maybe Café moments', 'Momentos en Maybe Café'),
     photo('galeria-5', 'Maybe Café moments', 'Momentos en Maybe Café'),
+  ],
+  // The printed menu boards in the "Menu" section, in order (tap to zoom).
+  menuBoards: [
+    board('menu-temporada', 'Maybe Café fall menu — pumpkin spice latte, pumpkin pie latte, cinnamon roll latte, crème brûlée latte, pumpkin spice chai, apple cloud refresher and pumpkin cinnamon roll mini pancakes', 'Menú de otoño de Maybe Café'),
+    board('menu-1', 'Maybe Café menu — coffee, matcha, and other drinks', 'Menú de Maybe Café — café, matcha y otras bebidas'),
+    board('menu-2', 'Maybe Café menu — açaí bowls, strawberries & cream bowls, and mini pancakes', 'Menú de Maybe Café — açaí bowls, fresas con crema y mini pancakes'),
+    board('toppings', 'Maybe Café topping choices', 'Toppings de Maybe Café'),
   ],
 };

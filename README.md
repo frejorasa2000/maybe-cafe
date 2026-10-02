@@ -127,6 +127,9 @@ desplegar:
 - **Opciones y toppings**: leches, syrups, cold foams y toppings — nombre en
   los dos idiomas, precio extra, disponible o no, y cuántos se pueden elegir.
 - **Horario**: días abiertos, horas y minutos antes del cierre.
+- **Imágenes del menú**: las imágenes del menú impreso de la sección "Menú"
+  (las nuevas se agregan al principio, para menús de temporada).
+- **Galería**: las fotos del carrusel.
 
 Los cambios se ven en la página en segundos (caché de 10 s).
 
