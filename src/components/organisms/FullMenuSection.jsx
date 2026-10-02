@@ -2,11 +2,13 @@ import Eyebrow from '../atoms/Eyebrow';
 import Reveal from '../atoms/Reveal';
 import { useLightbox } from './Lightbox';
 import { useT } from '../../hooks/useT';
+import seasonalMenu from '../../assets/images/menu de temporada.jpg';
 import menu1 from '../../assets/images/menu-1.jpg';
 import menu2 from '../../assets/images/menu-2.jpg';
 import toppings from '../../assets/images/toppings.jpg';
 
 const PAGES = [
+  { img: seasonalMenu, alt: 'Maybe Café fall menu — pumpkin spice latte, pumpkin pie latte, cinnamon roll latte, crème brûlée latte, pumpkin spice chai, apple cloud refresher and pumpkin cinnamon roll mini pancakes' },
   { img: menu1, alt: 'Maybe Café menu — coffee, matcha, and other drinks' },
   { img: menu2, alt: 'Maybe Café menu — açaí bowls, strawberries & cream bowls, and mini pancakes' },
   { img: toppings, alt: 'Maybe Café topping choices' },
@@ -25,7 +27,7 @@ export default function FullMenuSection() {
           <p className="mt-4 font-serif text-lg text-espresso/60 italic sm:text-xl">{t.fullMenu.sub}</p>
         </Reveal>
 
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {PAGES.map((page, i) => (
             <Reveal key={page.img} delay={i * 0.08}>
               <button
@@ -34,7 +36,9 @@ export default function FullMenuSection() {
                 data-cursor-hover
                 className="block w-full overflow-hidden rounded-xl border border-espresso/10 transition-colors hover:border-gold/50"
               >
-                <img src={page.img} alt={page.alt} className="aspect-[2/3] w-full object-cover" loading="lazy" />
+                {/* contain (not cover): the boards have slightly different proportions
+                    and cropping would cut off item names and prices */}
+                <img src={page.img} alt={page.alt} className="aspect-[2/3] w-full bg-paper-2 object-contain" loading="lazy" />
               </button>
             </Reveal>
           ))}
