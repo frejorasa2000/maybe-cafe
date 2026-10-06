@@ -4,7 +4,7 @@ import Button from '../atoms/Button';
 import Eyebrow from '../atoms/Eyebrow';
 import { usePointerFine } from '../../hooks/usePointerFine';
 import { useT } from '../../hooks/useT';
-import heroPhoto from '../../assets/images/group-matchas.jpg';
+import heroPhoto from '../../assets/images/camion fondo.jpeg';
 
 const lineVariants = {
   hidden: {},
@@ -38,8 +38,8 @@ export default function Hero() {
         style={{ background: 'radial-gradient(55% 55% at 82% 38%, rgba(169,117,44,.12), transparent 70%)' }}
       />
 
-      <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-12 px-6 pt-28 pb-16 sm:px-10 lg:grid-cols-[1.15fr_.85fr] lg:gap-16">
-        <div>
+      <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 pt-28 pb-16 sm:px-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-14">
+        <div className="order-last lg:order-none">
           <Eyebrow>{t.hero.eyebrow}</Eyebrow>
 
           <motion.h1
@@ -47,7 +47,7 @@ export default function Hero() {
             initial="hidden"
             animate="visible"
             variants={lineVariants}
-            className="mt-6 font-display text-5xl leading-[1.05] tracking-wide text-espresso uppercase sm:text-7xl lg:text-[5.25rem]"
+            className="mt-6 font-display text-5xl leading-[1.05] tracking-wide text-espresso uppercase sm:text-7xl lg:text-6xl xl:text-7xl"
           >
             <span className="block overflow-hidden">
               <motion.span variants={wordVariants} className="inline-block">
@@ -96,14 +96,14 @@ export default function Hero() {
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 1, ease: [0.16, 0.8, 0.2, 1] }}
-          className="relative mx-auto w-full max-w-sm lg:max-w-none"
+          className="relative mx-auto w-full max-w-xl lg:max-w-none"
         >
-          <span className="absolute -inset-3 rounded-[2.5rem] border border-gold/30" />
-          <div className="relative aspect-[3/4] overflow-hidden rounded-[2rem] bg-[#f6f5f3] shadow-[0_40px_80px_-40px_rgba(42,32,21,0.45)]">
+          <span className="absolute -inset-2 rounded-[2rem] border border-gold/30 sm:-inset-3 sm:rounded-[2.5rem]" />
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-[#f6f5f3] shadow-[0_40px_80px_-40px_rgba(42,32,21,0.45)] sm:rounded-[2rem]">
             <motion.img
               src={heroPhoto}
-              alt="Maybe Café matcha drinks"
-              className="h-full w-full animate-kenburns object-cover"
+              alt="Maybe Café coffee trailer in Carmel, NY"
+              className="h-full w-full scale-[1.04] object-cover"
               style={{ x: springX, y: springY }}
             />
           </div>
