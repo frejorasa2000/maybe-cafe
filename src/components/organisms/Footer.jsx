@@ -11,7 +11,7 @@ export default function Footer() {
   return (
     <footer className="border-t border-espresso/10 px-6 py-10 sm:px-10">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-6 sm:flex-row sm:justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center justify-center gap-3">
           <img
             src={logo}
             alt="Maybe Café"
@@ -21,6 +21,9 @@ export default function Footer() {
           <span className="text-xs text-espresso/45">
             © {new Date().getFullYear()} Maybe Café. {t.footer.rights}
           </span>
+          <a href="/privacy" data-cursor-hover className="text-xs text-espresso/60 underline underline-offset-4 hover:text-gold-soft">
+            {t.footer.privacy}
+          </a>
         </div>
         <div className="flex items-center gap-6 text-espresso/60">
           <a href={SOCIAL.instagram} target="_blank" rel="noopener noreferrer" data-cursor-hover className="hover:text-gold-soft">

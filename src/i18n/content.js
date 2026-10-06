@@ -123,6 +123,7 @@ export const content = {
     },
     footer: {
       rights: 'All rights reserved.',
+      privacy: 'Privacy Policy',
     },
     mobileMenu: {
       call: 'Call',
@@ -320,6 +321,7 @@ export const content = {
     },
     footer: {
       rights: 'Todos los derechos reservados.',
+      privacy: 'Política de privacidad',
     },
     mobileMenu: {
       call: 'Llamar',

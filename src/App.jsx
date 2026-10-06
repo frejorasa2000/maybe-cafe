@@ -7,14 +7,25 @@ import { fetchCatalog } from './features/catalog/catalogSlice';
 // The admin panel is only for the owner — loaded on demand so it never adds
 // weight to the public site.
 const AdminPage = lazy(() => import('./pages/AdminPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
 
 export default function App() {
   const dispatch = useDispatch();
-  const isAdmin = window.location.pathname.replace(/\/+$/, '') === '/admin';
+  const path = window.location.pathname.replace(/\/+$/, '');
+  const isAdmin = path === '/admin';
+  const isPrivacy = path === '/privacy';
 
   useEffect(() => {
-    if (!isAdmin) dispatch(fetchCatalog());
-  }, [dispatch, isAdmin]);
+    if (!isAdmin && !isPrivacy) dispatch(fetchCatalog());
+  }, [dispatch, isAdmin, isPrivacy]);
+
+  if (isPrivacy) {
+    return (
+      <Suspense fallback={null}>
+        <PrivacyPage />
+      </Suspense>
+    );
+  }
 
   if (isAdmin) {
     return (
