@@ -3,8 +3,8 @@
 @theme {
   /* Site palette: bone-white paper with the deep maroon of the trailer's
      "Grand Opening" ribbon as the accent. */
-  --color-paper: #f7f4ec;
-  --color-paper-2: #ece7da;
+  --color-paper: #faf9f5;
+  --color-paper-2: #f0ede5;
   --color-espresso: #2a2015;
 
   /* kept as literal dark/light for spots that intentionally stay locked to

@@ -33,11 +33,6 @@ export default function Hero() {
 
   return (
     <section id="top" className="relative flex min-h-screen items-center overflow-hidden" onMouseMove={handleMouseMove}>
-      <div
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{ background: 'radial-gradient(55% 55% at 82% 38%, rgba(169,117,44,.12), transparent 70%)' }}
-      />
-
       <div className="relative z-10 mx-auto grid w-full max-w-7xl items-center gap-12 px-6 pt-28 pb-16 sm:px-10 lg:grid-cols-[.8fr_1.2fr] lg:gap-14">
         <div className="order-last lg:order-none">
           <Eyebrow>{t.hero.eyebrow}</Eyebrow>
