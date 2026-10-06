@@ -23,14 +23,11 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Light text over the dark hero photo; switches to dark text once the
-  // page is scrolled onto the light paper theme, or while the (light) full
-  // -screen mobile menu is open behind the header.
-  const useLight = !scrolled && !mobileMenuOpen;
-  // The logo mark itself needs light/dark based on whatever is actually
-  // behind it: the dark hero photo, OR a dark-mode header/mobile-menu once
-  // the site theme is switched to dark.
-  const logoIsLight = useLight || theme === 'dark';
+  // The hero sits on the paper background like the rest of the page, so the
+  // header follows the site theme from the top (no light-over-photo state).
+  const useLight = false;
+  // The logo is a black mark: invert it when the site theme is dark.
+  const logoIsLight = theme === 'dark';
 
   const links = [
     { href: '#favorites', label: t.nav.favorites },

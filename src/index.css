@@ -1,12 +1,10 @@
 @import "tailwindcss";
 
 @theme {
-  /* Site palette tuned to the real trailer's warm cream body and its deep
-     maroon "Grand Opening" ribbon. The hero keeps a dark night-photo
-     treatment (it locks in its own light text), everything else uses the
-     lighter, trailer-toned palette below. */
-  --color-paper: #f3e9d2;
-  --color-paper-2: #e9dab4;
+  /* Site palette: bone-white paper with the deep maroon of the trailer's
+     "Grand Opening" ribbon as the accent. */
+  --color-paper: #f7f4ec;
+  --color-paper-2: #ece7da;
   --color-espresso: #2a2015;
 
   /* kept as literal dark/light for spots that intentionally stay locked to
