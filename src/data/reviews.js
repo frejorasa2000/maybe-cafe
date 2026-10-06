@@ -4,18 +4,32 @@
 // they are not machine-translated when the site is switched to Spanish,
 // same as Google itself treats them.
 //
-// Google shows 4 reviews / 5.0 average total. Two of them (Samantha Barrera
-// and the business owner's own review) carry only a star rating with no
-// written text on Google, so they are not shown as quote cards here — but
-// they ARE counted in REVIEW_SUMMARY below so the displayed average/count
-// stays accurate. Update both when new reviews come in.
+// Updated 2026-10-05: three more reviews pasted by the owner, and the
+// average Google Maps showed that day (4.8). The total number of reviews
+// was not confirmed, so `count` is null and the summary shows only the
+// average — set it to the real total to show "N reviews" again.
 
 export const REVIEW_SUMMARY = {
-  rating: 5.0,
-  count: 4,
+  rating: 4.8,
+  count: null,
 };
 
 export const REVIEWS = [
+  {
+    name: 'Melissa Loja',
+    rating: 5,
+    text: "FINALLY something good in the area! Im a super picky eater but this hidden Gem can get all my money! Customer service was excellent & the drinks were amazing! Not only is everything aesthetically pleasing, but it tastes even better. I'll definitely be back!",
+  },
+  {
+    name: 'Karen Hernandez',
+    rating: 5,
+    text: "Really great addition to the area! I ordered a banana pudding matcha with oat milk and it was *chef's kiss* I also noticed they have Guatemalan granizadas and had to order one. Granizadas are crushed ice with fruit syrups. I highly recommend trying one if you've never had! Wishing the cafe lots of success.",
+  },
+  {
+    name: 'Mia Sbuttoni',
+    rating: 5,
+    text: 'super yum matcha. recommend the banana pudding matcha',
+  },
   {
     name: 'Hillary Barrera',
     rating: 5,
