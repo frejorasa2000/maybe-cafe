@@ -2,8 +2,10 @@ import { ADDRESS, EMAIL, PHONE } from '../data/siteInfo';
 
 // Privacy policy copy, kept apart from content.js because it is long and only
 // the /privacy page needs it. It describes what the site actually does:
-// orders + payments through Square, reservation/review forms sent by email
-// (Resend), hosting on Vercel, no analytics or advertising trackers.
+// orders + payments through Square, customers follow their order on the
+// ?order= status link (no emails to customers), order/reservation/review
+// notices emailed to the owner only (Resend), hosting on Vercel, no analytics
+// or advertising trackers.
 // Update `updated` whenever the text changes.
 export const privacy = {
   en: {
@@ -26,20 +28,21 @@ export const privacy = {
       {
         heading: 'How we use your information',
         list: [
-          'To prepare your order and let you know when it is ready.',
+          'To prepare your order and show its progress on your order status link.',
+          'To contact you if there is a problem with your order.',
           'To confirm, change, or answer questions about a reservation.',
-          'To send order confirmations and status updates by email.',
           'To reply to your messages and improve our service.',
           'To keep the website secure and meet our legal and accounting obligations.',
         ],
-        after: 'We do not sell your personal information, and we do not use it for advertising.',
+        after:
+          'We do not send order updates or marketing by email: you follow your order on the status link you get after paying. We do not sell your personal information, and we do not use it for advertising.',
       },
       {
         heading: 'Who we share it with',
         body: 'We share information only with the service providers that make the website work, and only as needed for that purpose:',
         list: [
           'Square — payment processing and order management.',
-          'Resend — delivery of order, reservation, and review emails.',
+          'Resend — delivers the internal notices our team receives when an order, reservation request, or review comes in.',
           'Vercel — website hosting.',
           'Google — the fonts on this site are loaded from Google Fonts.',
         ],
@@ -92,20 +95,21 @@ export const privacy = {
       {
         heading: 'Cómo usamos tu información',
         list: [
-          'Para preparar tu pedido y avisarte cuando esté listo.',
+          'Para preparar tu pedido y mostrar su avance en el enlace de estado de tu pedido.',
+          'Para contactarte si hay algún problema con tu pedido.',
           'Para confirmar, cambiar o responder dudas sobre una reservación.',
-          'Para enviarte confirmaciones y actualizaciones de tu pedido por correo electrónico.',
           'Para responder tus mensajes y mejorar nuestro servicio.',
           'Para mantener el sitio seguro y cumplir con nuestras obligaciones legales y contables.',
         ],
-        after: 'No vendemos tu información personal ni la usamos para publicidad.',
+        after:
+          'No enviamos actualizaciones del pedido ni publicidad por correo: sigues tu pedido en el enlace de estado que recibes al pagar. No vendemos tu información personal ni la usamos para publicidad.',
       },
       {
         heading: 'Con quién la compartimos',
         body: 'Compartimos información solo con los proveedores que hacen funcionar el sitio, y únicamente en la medida necesaria para ello:',
         list: [
           'Square — procesamiento de pagos y gestión de pedidos.',
-          'Resend — envío de correos de pedidos, reservaciones y reseñas.',
+          'Resend — entrega los avisos internos que recibe nuestro equipo cuando llega un pedido, una solicitud de reservación o una reseña.',
           'Vercel — alojamiento del sitio web.',
           'Google — las tipografías de este sitio se cargan desde Google Fonts.',
         ],
