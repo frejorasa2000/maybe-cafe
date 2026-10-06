@@ -70,13 +70,12 @@ el cobro de principio a fin. Mientras tanto sí puedes ver/usar el carrito y
 el diseño del checkout con `npm run dev`, solo el paso final de pago
 mostrará un error de conexión.
 
-### Correo al cliente cuando cambia el estado del pedido
+### Webhook de Square (reembolsos)
 
-`api/webhooks/square-order.js` escucha el webhook de Square
-`order.fulfillment.updated` (se dispara cada vez que cambias el estado del
-pedido — Proposed → Reserved → Prepared → Completed — desde el dashboard o
-el POS) y le manda un correo al cliente con ese avance, usando el email que
-dejó en el checkout. Requiere `RESEND_API_KEY` configurada.
+Al cliente no se le envían correos: sigue su pedido en el enlace
+`?order=<id>` que recibe al pagar. `api/webhooks/square-order.js` solo
+escucha `refund.updated`, para cancelar el pedido cuando se reembolsa por
+completo (ver "Reembolsos y cancelaciones").
 
 Para activarlo:
 
@@ -87,22 +86,19 @@ Para activarlo:
    En local usa un túnel (ej. `ngrok http <puerto>`, no viene instalado) y
    apunta a `https://<tu-túnel>.ngrok-free.app/api/webhooks/square-order`;
    en producción sería `https://tu-dominio.vercel.app/api/webhooks/square-order`.
-3. **Events**: suscribe a `order.fulfillment.updated` **y** `refund.updated`.
+3. **Events**: suscribe a `refund.updated`.
 4. Copia la **Signature Key** que te muestra Square a
    `SQUARE_WEBHOOK_SIGNATURE_KEY`, y pon esa misma Notification URL en
    `SQUARE_WEBHOOK_NOTIFICATION_URL` — ambas se usan para verificar que el
    webhook viene realmente de Square.
-5. Prueba cambiando el estado del pedido desde el dashboard/POS de Square;
-   el correo debería llegar en segundos.
 
 ### Reembolsos y cancelaciones
 
 En Square, reembolsar un pago **no** cancela el pedido. Por eso, cuando llega
 `refund.updated` con un reembolso total de un pedido que todavía no se
 entregó, el webhook pasa el fulfillment a CANCELED: el pedido se ve
-cancelado en el dashboard/POS y el cliente recibe el correo "canceled &
-refunded". Si el pedido ya estaba completado, o el reembolso es parcial, solo
-se le avisa del reembolso. La página `?order=<id>` también muestra el monto
+cancelado en el dashboard/POS y en el enlace de estado del cliente. La página
+`?order=<id>` también muestra el monto
 reembolsado y trata un reembolso total como cancelado (aunque el webhook no
 esté configurado). La lógica compartida con Square vive en `api/_lib/square.js`.
 

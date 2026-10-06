@@ -1,5 +1,5 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { cancelFulfillment, getOrder, getRefundInfo, lineItemLabel, squareRequest } from '../_lib/square.js';
+import { cancelFulfillment, getOrder, getRefundInfo, squareRequest } from '../_lib/square.js';
 
 // Vercel parses the body into req.body by default, but Square's signature is
 // computed over the exact raw bytes it sent — parsing first would make the
@@ -22,95 +22,6 @@ function isValidSquareSignature({ rawBody, signatureHeader, signatureKey, notifi
   const received = Buffer.from(signatureHeader);
   if (expected.length !== received.length) return false;
   return timingSafeEqual(expected, received);
-}
-
-function escapeHtml(value) {
-  return String(value || '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
-}
-
-// Keyed by the PICKUP fulfillment state — that's what actually matters to a
-// customer waiting on a coffee, more than the order's own OPEN/COMPLETED state.
-const STATUS_COPY = {
-  PROPOSED: { subject: 'We got your order — Maybe Café', headline: "We've got your order!", body: "Thanks for ordering from Maybe Café — we'll start preparing it soon." },
-  RESERVED: { subject: 'Your order is confirmed — Maybe Café', headline: 'Order confirmed', body: "Your order is confirmed and we'll start preparing it shortly." },
-  PREPARED: { subject: 'Your order is ready for pickup! — Maybe Café', headline: 'Ready for pickup!', body: "Your order is ready — come grab it whenever you're ready." },
-  COMPLETED: { subject: 'Thanks for stopping by! — Maybe Café', headline: 'Order completed', body: 'Thanks for picking up your order. See you again soon!' },
-  CANCELED: { subject: 'Your order was canceled — Maybe Café', headline: 'Order canceled', body: 'Your order was canceled. If this is unexpected, please reach out to us.' },
-  // Sent instead of CANCELED when the order's payment was fully refunded.
-  CANCELED_REFUNDED: {
-    subject: 'Your order was canceled and refunded — Maybe Café',
-    headline: 'Order canceled & refunded',
-    body: 'Your order was canceled and your payment has been fully refunded. It can take 5–10 business days to show on your statement.',
-  },
-  // A refund on an order that was already picked up (or canceled earlier).
-  REFUNDED: {
-    subject: 'Your refund is on its way — Maybe Café',
-    headline: 'Refund processed',
-    body: "We've refunded your payment. It can take 5–10 business days to show on your statement.",
-  },
-  FAILED: { subject: 'There was a problem with your order — Maybe Café', headline: 'Order issue', body: 'Something went wrong with your order. Please contact us so we can help.' },
-};
-
-function buildEmailHtml({ customerName, copy, order }) {
-  const itemsHtml = (order.line_items || [])
-    .map((li) => `<li>${escapeHtml(li.quantity)}x ${escapeHtml(lineItemLabel(li))} — $${(li.total_money.amount / 100).toFixed(2)}</li>`)
-    .join('');
-  return `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background:#0a0908;font-family:Georgia,'Times New Roman',serif;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0a0908;padding:32px 16px;">
-      <tr>
-        <td align="center">
-          <table role="presentation" width="100%" style="max-width:520px;background:#141110;border-radius:16px;overflow:hidden;border:1px solid #2a251f;">
-            <tr>
-              <td style="background:linear-gradient(135deg,#e4c988,#c9a24b);padding:28px 32px;">
-                <p style="margin:0;color:#0a0908;font-size:12px;letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif;">Maybe Café</p>
-                <h1 style="margin:6px 0 0;color:#0a0908;font-size:22px;font-family:Arial,sans-serif;">${escapeHtml(copy.headline)}</h1>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:28px 32px;">
-                <p style="margin:0 0 18px;color:#f3ecdf;font-size:15px;line-height:1.6;">Hi ${escapeHtml(customerName)}, ${escapeHtml(copy.body)}</p>
-                <p style="margin:0 0 6px;color:#c9a24b;font-size:12px;text-transform:uppercase;letter-spacing:1px;font-family:Arial,sans-serif;">Order (pickup)</p>
-                <ul style="margin:0 0 18px;padding-left:18px;color:#f3ecdf;font-size:15px;line-height:1.7;">${itemsHtml}</ul>
-                <p style="margin:0;color:#e4c988;font-size:20px;">Total: $${(order.total_money.amount / 100).toFixed(2)}</p>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:18px 32px;background:#0a0908;font-family:Arial,sans-serif;">
-                <p style="margin:0;color:#8a8171;font-size:12px;">Square order ID: ${escapeHtml(order.id)}</p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </body>
-</html>`;
-}
-
-async function sendStatusEmail({ customer, copy, order }) {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey || !customer?.email) return;
-
-  try {
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: 'Maybe Café <onboarding@resend.dev>',
-        to: [customer.email],
-        subject: copy.subject,
-        html: buildEmailHtml({ customerName: customer.name, copy, order }),
-      }),
-    });
-  } catch (err) {
-    console.error('Order status email failed:', err);
-  }
 }
 
 export default async function handler(req, res) {
@@ -143,12 +54,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    // order.fulfillment.updated fires specifically when a fulfillment's state
-    // changes (unlike order.updated, which fires on any field, e.g. version
-    // bumps) — that specificity is what keeps this from emailing on noise.
-    if (event.type === 'order.fulfillment.updated') {
-      await handleFulfillmentUpdated(event.data?.id);
-    } else if (event.type === 'refund.updated') {
+    // Customers follow their order on the ?order=<id> status link — nothing
+    // is emailed to them — so the only event acted on is a refund.
+    if (event.type === 'refund.updated') {
       await handleRefundUpdated(event.data?.object?.refund);
     }
     res.status(200).json({ ok: true });
@@ -158,28 +66,9 @@ export default async function handler(req, res) {
   }
 }
 
-function recipientOf(order) {
-  const recipient = order.fulfillments?.[0]?.pickup_details?.recipient;
-  return recipient?.email_address ? { name: recipient.display_name, email: recipient.email_address } : null;
-}
-
-async function handleFulfillmentUpdated(orderId) {
-  if (!orderId) return;
-  const order = await getOrder(orderId);
-  if (!order) return;
-
-  const state = order.fulfillments?.[0]?.state;
-  let copy = STATUS_COPY[state];
-  if (state === 'CANCELED' && (await getRefundInfo(order)).fullyRefunded) copy = STATUS_COPY.CANCELED_REFUNDED;
-
-  const customer = recipientOf(order);
-  if (copy && customer) await sendStatusEmail({ customer, copy, order });
-}
-
 // Refunding in Square only touches the Payment — the Order stays open, so the
 // dashboard and the tracking link would still say "received". A full refund
-// cancels the pickup here; the resulting order.fulfillment.updated event then
-// sends the customer the "canceled & refunded" email.
+// of an order that hasn't been picked up cancels the pickup here.
 async function handleRefundUpdated(refund) {
   if (refund?.status !== 'COMPLETED' || !refund.payment_id) return;
 
@@ -194,11 +83,5 @@ async function handleRefundUpdated(refund) {
 
   if (fullyRefunded && ['PROPOSED', 'RESERVED', 'PREPARED'].includes(state)) {
     await cancelFulfillment(order);
-    return;
   }
-
-  // Already picked up/canceled, or only part of it was refunded: the order
-  // stays as it is, but the customer still hears about their money.
-  const customer = recipientOf(order);
-  if (customer) await sendStatusEmail({ customer, copy: STATUS_COPY.REFUNDED, order });
 }

@@ -49,8 +49,8 @@ export async function getRefundInfo(order) {
 }
 
 // Moves the pickup fulfillment to CANCELED — this is what makes the order
-// show as canceled in Square's Orders dashboard/POS, and it fires
-// order.fulfillment.updated, which sends the customer their email.
+// show as canceled in Square's Orders dashboard/POS and on the customer's
+// order status link.
 export async function cancelFulfillment(order) {
   const fulfillment = order.fulfillments?.[0];
   if (!fulfillment) return false;
