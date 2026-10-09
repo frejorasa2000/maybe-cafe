@@ -211,7 +211,7 @@ export default function CheckoutModal() {
       submitPayment({
         sourceId: result.token,
         customer: fields,
-        items: items.map((item) => ({ productId: item.productId, sizeId: item.sizeId, quantity: item.quantity })),
+        items: items.map(toOrderItem),
       })
     );
   }

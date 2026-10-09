@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useDispatch, useSelector } from 'react-redux';
-import { addItem, closeCustomize } from '../../features/cart/cartSlice';
+import { addItem, closeCustomize, updateItem } from '../../features/cart/cartSlice';
 import { selectCatalog, selectMenu } from '../../features/catalog/catalogSlice';
 import { defaultSelections, getProductGroups, optionsPrice, resolveSelections } from '../../data/catalog';
 import { CloseIcon } from '../atoms/icons/UiIcons';
@@ -17,13 +17,25 @@ export default function CustomizeModal() {
   const customizing = useSelector((s) => s.cart.customizing);
   const catalog = useSelector(selectCatalog);
   const menu = useSelector(selectMenu);
+  const editing = Boolean(customizing?.editId);
   const dish = customizing && menu.find((d) => d.id === customizing.productId);
-  const size = dish?.sizes.find((s) => s.id === customizing.sizeId);
   const groups = dish ? getProductGroups(catalog, dish.id) : [];
   const [selections, setSelections] = useState({});
+  // Only changeable while editing a cart line; otherwise the size is the one
+  // tapped on the menu card.
+  const [pickedSizeId, setPickedSizeId] = useState(null);
+  const size =
+    (editing && dish?.sizes.find((s) => s.id === pickedSizeId)) || dish?.sizes.find((s) => s.id === customizing.sizeId);
 
   useEffect(() => {
-    if (customizing) setSelections(defaultSelections(catalog, customizing.productId));
+    if (!customizing) return;
+    setPickedSizeId(null);
+    const defaults = defaultSelections(catalog, customizing.productId);
+    // Editing starts from what the line already has, unless the catalog
+    // changed since and those choices no longer apply.
+    const saved = { ...defaults, ...customizing.selections };
+    const usable = customizing.editId && !resolveSelections(catalog, customizing.productId, saved).error;
+    setSelections(usable ? saved : defaults);
   }, [customizing, catalog]);
 
   const resolved = dish ? resolveSelections(catalog, dish.id, selections) : { chosen: [] };
@@ -45,7 +57,8 @@ export default function CustomizeModal() {
 
   function handleAdd() {
     if (resolved.error) return;
-    dispatch(addItem({ dish, size, selections, chosen: resolved.chosen }));
+    const line = { dish, size, selections, chosen: resolved.chosen };
+    dispatch(editing ? updateItem({ id: customizing.editId, ...line }) : addItem(line));
     dispatch(closeCustomize());
   }
 
@@ -94,6 +107,28 @@ export default function CustomizeModal() {
               </div>
 
               <div className="flex-1 overflow-y-auto px-6 py-4">
+                {editing && dish.sizes.length > 1 && (
+                  <fieldset className="border-b border-espresso/10 py-4 last:border-b-0">
+                    <legend className="contents">
+                      <span className="block font-serif text-lg text-espresso">{t.customize.size}</span>
+                    </legend>
+                    <div className="mt-3 flex flex-col">
+                      {dish.sizes.map((s) => (
+                        <label key={s.id} data-cursor-hover className="flex cursor-pointer items-center gap-3 py-2 text-sm text-espresso/80">
+                          <input
+                            type="radio"
+                            name={`${dish.id}-size`}
+                            checked={s.id === size.id}
+                            onChange={() => setPickedSizeId(s.id)}
+                            className="h-4 w-4 shrink-0 accent-[#c9a24b]"
+                          />
+                          <span className="flex-1">{s.label[lang]}</span>
+                          <span className="text-xs text-espresso/50">${s.price.toFixed(2)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                )}
                 {groups.map((group) => {
                   const picked = selections[group.id] || [];
                   const full = picked.length >= group.max;
@@ -148,7 +183,7 @@ export default function CustomizeModal() {
                   onClick={handleAdd}
                   className="w-full justify-center disabled:opacity-60"
                 >
-                  {t.customize.addBtn(total)}
+                  {editing ? t.customize.saveBtn(total) : t.customize.addBtn(total)}
                 </Button>
               </div>
             </motion.div>

@@ -4,12 +4,15 @@ import {
   closeCart,
   decrementItem,
   incrementItem,
+  openCustomize,
   removeItem,
   selectCartItems,
   selectCartTotal,
   selectEstimatedMinutes,
 } from '../../features/cart/cartSlice';
 import { openCheckout } from '../../features/checkout/checkoutSlice';
+import { selectCatalog, selectMenu } from '../../features/catalog/catalogSlice';
+import { resolveSelections } from '../../data/catalog';
 import { CloseIcon } from '../atoms/icons/UiIcons';
 import Button from '../atoms/Button';
 import { useT } from '../../hooks/useT';
@@ -23,6 +26,20 @@ export default function CartDrawer() {
   const total = useSelector(selectCartTotal);
   const estimatedMinutes = useSelector(selectEstimatedMinutes);
   const ordering = useOrderingStatus();
+  const catalog = useSelector(selectCatalog);
+  const menu = useSelector(selectMenu);
+  // A line whose options no longer pass against the live catalog (e.g. a
+  // required milk is missing) would be rejected by the server at payment, so
+  // it's flagged here and has to be edited first.
+  const lines = items.map((item) => {
+    const dish = menu.find((d) => d.id === item.productId);
+    return {
+      item,
+      canEdit: Boolean(dish) && (dish.hasOptions || dish.sizes.length > 1),
+      needsUpdate: Boolean(dish) && Boolean(resolveSelections(catalog, item.productId, item.selections).error),
+    };
+  });
+  const cartValid = lines.every((line) => !line.needsUpdate);
 
   return (
     <AnimatePresence>
@@ -63,7 +80,7 @@ export default function CartDrawer() {
                 </div>
               ) : (
                 <ul className="flex flex-col gap-4">
-                  {items.map((item) => (
+                  {lines.map(({ item, canEdit, needsUpdate }) => (
                     <li key={item.id} className="flex items-center gap-4 rounded-xl border border-espresso/10 bg-paper-2/60 p-3">
                       <img
                         src={item.image}
@@ -78,6 +95,7 @@ export default function CartDrawer() {
                         {item.options?.length > 0 && (
                           <p className="text-xs text-espresso/50">{item.options.map((label) => label[lang]).join(', ')}</p>
                         )}
+                        {needsUpdate && <p className="mt-1 text-xs text-wine-soft">{t.cart.needsUpdate}</p>}
                         <div className="mt-2 flex items-center gap-3">
                           <div className="flex items-center gap-2 rounded-full border border-espresso/15">
                             <button
@@ -98,6 +116,25 @@ export default function CartDrawer() {
                               +
                             </button>
                           </div>
+                          {canEdit && (
+                            <button
+                              type="button"
+                              data-cursor-hover
+                              onClick={() =>
+                                dispatch(
+                                  openCustomize({
+                                    productId: item.productId,
+                                    sizeId: item.sizeId,
+                                    editId: item.id,
+                                    selections: item.selections,
+                                  })
+                                )
+                              }
+                              className="text-xs text-gold-soft underline underline-offset-2"
+                            >
+                              {t.cart.edit}
+                            </button>
+                          )}
                           <button
                             type="button"
                             data-cursor-hover
@@ -126,7 +163,7 @@ export default function CartDrawer() {
                 <Button
                   as="button"
                   type="button"
-                  disabled={!ordering.open}
+                  disabled={!ordering.open || !cartValid}
                   className="w-full justify-center disabled:opacity-60"
                   onClick={() => dispatch(openCheckout())}
                 >

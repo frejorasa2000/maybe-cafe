@@ -138,12 +138,16 @@ export const content = {
       checkoutBtn: 'Checkout',
       continueBtn: 'Continue browsing',
       remove: 'Remove',
+      edit: 'Edit',
+      needsUpdate: 'This item needs an update — tap Edit to review its options.',
     },
     customize: {
       required: 'Required',
       optional: 'Optional',
       chooseUpTo: (max) => `Choose up to ${max}`,
       addBtn: (total) => `Add to order · $${total.toFixed(2)}`,
+      saveBtn: (total) => `Save changes · $${total.toFixed(2)}`,
+      size: 'Size',
     },
     checkout: {
       title: 'Checkout',
@@ -336,12 +340,16 @@ export const content = {
       checkoutBtn: 'Pagar',
       continueBtn: 'Seguir viendo el menú',
       remove: 'Quitar',
+      edit: 'Editar',
+      needsUpdate: 'Este producto necesita actualizarse — toca Editar para revisar sus opciones.',
     },
     customize: {
       required: 'Obligatorio',
       optional: 'Opcional',
       chooseUpTo: (max) => `Elige hasta ${max}`,
       addBtn: (total) => `Agregar al pedido · $${total.toFixed(2)}`,
+      saveBtn: (total) => `Guardar cambios · $${total.toFixed(2)}`,
+      size: 'Tamaño',
     },
     checkout: {
       title: 'Pagar pedido',

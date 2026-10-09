@@ -9,36 +9,57 @@ function lineId(productId, sizeId, chosen) {
   return `${productId}::${sizeId}::${optionsKey}`;
 }
 
+function buildLine({ dish, size, selections = {}, chosen = [] }, quantity) {
+  return {
+    id: lineId(dish.id, size.id, chosen),
+    productId: dish.id,
+    name: dish.name,
+    tag: dish.tag,
+    image: dish.image,
+    sizeId: size.id,
+    sizeLabel: size.label,
+    selections,
+    options: chosen.map((o) => o.label),
+    price: Math.round((size.price + optionsPrice(chosen)) * 100) / 100,
+    quantity,
+  };
+}
+
 const cartSlice = createSlice({
   name: 'cart',
   initialState: {
     isOpen: false,
-    customizing: null, // { productId, sizeId } while the options modal is open
+    // { productId, sizeId } while the options modal is open; plus
+    // { editId, selections } when it's editing a line already in the cart.
+    customizing: null,
     items: [], // { id, productId, name, tag, image, sizeId, sizeLabel, selections, options, price, quantity }
   },
   reducers: {
     // `chosen` is the already-validated output of resolveSelections() against
     // the live catalog (CustomizeModal does that); the server re-checks it.
     addItem(state, action) {
-      const { dish, size, selections = {}, chosen = [] } = action.payload;
-      const id = lineId(dish.id, size.id, chosen);
-      const existing = state.items.find((item) => item.id === id);
+      const line = buildLine(action.payload, 1);
+      const existing = state.items.find((item) => item.id === line.id);
       if (existing) {
         existing.quantity += 1;
       } else {
-        state.items.push({
-          id,
-          productId: dish.id,
-          name: dish.name,
-          tag: dish.tag,
-          image: dish.image,
-          sizeId: size.id,
-          sizeLabel: size.label,
-          selections,
-          options: chosen.map((o) => o.label),
-          price: Math.round((size.price + optionsPrice(chosen)) * 100) / 100,
-          quantity: 1,
-        });
+        state.items.push(line);
+      }
+    },
+    // Replaces a cart line with its edited version (new size/options/price),
+    // keeping its place and quantity. If the result matches another line, the
+    // two are merged.
+    updateItem(state, action) {
+      const { id, ...payload } = action.payload;
+      const index = state.items.findIndex((item) => item.id === id);
+      if (index === -1) return;
+      const line = buildLine(payload, state.items[index].quantity);
+      const twin = state.items.find((item, i) => i !== index && item.id === line.id);
+      if (twin) {
+        twin.quantity += line.quantity;
+        state.items.splice(index, 1);
+      } else {
+        state.items[index] = line;
       }
     },
     openCustomize(state, action) {
@@ -79,6 +100,7 @@ const cartSlice = createSlice({
 
 export const {
   addItem,
+  updateItem,
   openCustomize,
   closeCustomize,
   incrementItem,
