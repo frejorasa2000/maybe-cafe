@@ -47,6 +47,9 @@ export default function CheckoutModal() {
   // Shown right under the wallet buttons — on a phone the card section is
   // often below the fold, so an error there looked like "the button does nothing".
   const [walletError, setWalletError] = useState(null);
+  // True from the tap until the wallet sheet returns, so the tap always has
+  // a visible effect even if the sheet never shows up.
+  const [walletBusy, setWalletBusy] = useState(false);
 
   const googlePayContainerRef = useRef(null);
   const googlePayRef = useRef(null);
@@ -140,22 +143,29 @@ export default function CheckoutModal() {
 
   async function handleWalletClick(walletRef) {
     const instance = walletRef.current;
-    if (!instance || !ordering.open) return;
+    if (!ordering.open) return;
+    if (!instance) {
+      setWalletError(t.checkout.walletFailed);
+      return;
+    }
     if (!fields.name.trim() || !fields.email.trim() || !fields.phone.trim()) {
       setWalletError(t.checkout.walletNeedsInfo);
       return;
     }
     setWalletError(null);
+    setWalletBusy(true);
     try {
       // Must be the first await: Safari only opens the Apple Pay sheet while
       // still inside the tap's user gesture.
       const result = await instance.tokenize();
       if (result.status !== 'OK') {
         console.warn('Wallet tokenize failed:', result);
-        // Closing the Apple Pay / Google Pay sheet isn't an error worth showing.
-        if (result.status !== 'Cancel') {
-          setWalletError(result.errors?.[0]?.message || t.checkout.walletFailed);
-        }
+        // Never fail silently: a sheet that closes by itself (e.g. merchant
+        // validation failed) also comes back as "Cancel", and without a
+        // message the button just looks dead.
+        const detail = (result.errors || []).map((e) => e.message).filter(Boolean).join(' ');
+        if (result.status === 'Cancel' && !detail) setWalletError(t.checkout.walletCancelled);
+        else setWalletError(`${detail || t.checkout.walletFailed} (${result.status})`);
         return;
       }
       setOrderEta(estimatedMinutes);
@@ -172,6 +182,8 @@ export default function CheckoutModal() {
     } catch (err) {
       console.error('Wallet payment error:', err);
       setWalletError(err.message || t.checkout.walletFailed);
+    } finally {
+      setWalletBusy(false);
     }
   }
 
@@ -180,6 +192,7 @@ export default function CheckoutModal() {
       setFields({ name: '', email: '', phone: '' });
       setCardError(null);
       setWalletError(null);
+      setWalletBusy(false);
       setOrderEta(null);
     }
   }, [isOpen]);
@@ -341,6 +354,9 @@ export default function CheckoutModal() {
                       <p role="alert" className="rounded-lg bg-wine/10 px-3 py-2 text-xs text-wine-soft">
                         {walletError}
                       </p>
+                    )}
+                    {walletBusy && status !== 'submitting' && (
+                      <p className="text-center text-xs text-espresso/60">{t.checkout.walletOpening}</p>
                     )}
                     {status === 'submitting' && (googlePayReady || applePayReady) && (
                       <p className="text-center text-xs text-espresso/60">{t.checkout.payingBtn}</p>
