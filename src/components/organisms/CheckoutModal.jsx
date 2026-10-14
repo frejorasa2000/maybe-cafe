@@ -9,7 +9,7 @@ import Button from '../atoms/Button';
 import { PHONE } from '../../data/siteInfo';
 import { useT } from '../../hooks/useT';
 import { useOrderingStatus } from '../../hooks/useOrderingStatus';
-import { WALLET_DEBUG, startWalletTrace } from '../../utils/walletTrace';
+import { WALLET_DEBUG, reportApplePayUnavailable, startWalletTrace } from '../../utils/walletTrace';
 
 const APP_ID = import.meta.env.VITE_SQUARE_APP_ID;
 const LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID;
@@ -120,6 +120,7 @@ export default function CheckoutModal() {
         setApplePayReady(true);
       } catch (err) {
         console.warn('Apple Pay unavailable:', err);
+        if (!cancelled) reportApplePayUnavailable(err);
       }
     }
 

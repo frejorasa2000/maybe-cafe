@@ -23,6 +23,32 @@ const fmt = (value) => {
   }
 };
 
+function report(wallet, trace) {
+  fetch('/api/wallet-log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ wallet, trace }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
+// Apple Pay exists on this device but Square wouldn't offer it, so the
+// button stays hidden and there's no tap to trace. Reported once per page
+// load (the checkout re-attaches every time it opens).
+let unavailableReported = false;
+export function reportApplePayUnavailable(err) {
+  const Session = window.ApplePaySession;
+  if (!Session || unavailableReported) return;
+  unavailableReported = true;
+  const lines = [`applePay · ${window.location.host} · ${navigator.userAgent}`, `button not shown: ${fmt(err)}`];
+  try {
+    lines.push(`canMakePayments: ${Session.canMakePayments()}`);
+  } catch (e) {
+    lines.push(`canMakePayments threw: ${fmt(e)}`);
+  }
+  report('applePay', lines.join('\n'));
+}
+
 function traceApplePaySession(Original, log) {
   class TracedSession extends Original {
     constructor(version, request) {
@@ -100,12 +126,7 @@ export function startWalletTrace(wallet) {
       const text = lines.join('\n');
       if (failed) {
         deepTrace = true;
-        fetch('/api/wallet-log', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ wallet, trace: text }),
-          keepalive: true,
-        }).catch(() => {});
+        report(wallet, text);
       }
       return text;
     },
