@@ -1,26 +1,39 @@
-// Receives the trace of a failed Apple Pay / Google Pay attempt from the
-// checkout (see src/utils/walletTrace.js) and keeps the latest ones in Redis
-// for the "Diagnóstico de pagos" tab of /admin. No customer details are sent
-// and the IP is only used for the rate limit, never stored with the entry.
+// Receives the trace of an Apple Pay / Google Pay attempt from the checkout
+// (see src/utils/walletTrace.js) and keeps the latest ones in Redis for the
+// "Diagnóstico de pagos" tab of /admin. No customer details are sent and the
+// IP is only used for the rate limit, never stored with the entry.
 import { getRedis } from './_lib/catalogStore.js';
 
 export const WALLET_LOG_KEY = 'maybe:wallet-log';
 const MAX_ENTRIES = 50;
 const MAX_CHARS = 6000;
 const MAX_PER_IP = 20; // per hour
+const OUTCOMES = ['paid', 'cancelled', 'failed', 'rejected', 'hidden'];
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-  const { wallet, trace } = req.body || {};
-  if (typeof trace !== 'string' || !trace.trim() || !['applePay', 'googlePay'].includes(wallet)) {
+  // Pages loaded before outcomes existed only ever reported failures.
+  const { wallet, outcome = 'failed', ms, trace } = req.body || {};
+  if (
+    typeof trace !== 'string' ||
+    !trace.trim() ||
+    !['applePay', 'googlePay'].includes(wallet) ||
+    !OUTCOMES.includes(outcome)
+  ) {
     res.status(400).json({ error: 'Invalid log.' });
     return;
   }
 
-  const entry = { at: new Date().toISOString(), wallet, trace: trace.slice(0, MAX_CHARS) };
+  const entry = {
+    at: new Date().toISOString(),
+    wallet,
+    outcome,
+    ms: Math.max(0, Math.round(Number(ms)) || 0),
+    trace: trace.slice(0, MAX_CHARS),
+  };
   console.warn('wallet-log:', JSON.stringify(entry));
 
   const redis = getRedis();

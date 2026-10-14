@@ -12,7 +12,7 @@ import { slugify, validateCatalog } from '../src/data/catalog.js';
 import { WALLET_LOG_KEY } from './wallet-log.js';
 
 // Everything the /admin panel needs, behind one function (Vercel's Hobby plan
-// caps the number of functions): POST /api/admin?action=login|logout|session|save|upload|walletLog.
+// caps the number of functions): POST /api/admin?action=login|logout|session|save|upload|walletLog|walletLogDelete.
 // Uploaded photos are already resized to a small JPEG in the browser.
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -83,6 +83,22 @@ async function walletLog(req, res) {
   res.status(200).json({ entries: redis ? await redis.lrange(WALLET_LOG_KEY, 0, -1) : [] });
 }
 
+// Removes one entry (identified by its timestamp) and returns what's left.
+async function walletLogDelete(req, res) {
+  const redis = getRedis();
+  const at = req.body?.at;
+  if (!redis || typeof at !== 'string') {
+    res.status(400).json({ error: 'No se pudo eliminar el registro.' });
+    return;
+  }
+  const entries = (await redis.lrange(WALLET_LOG_KEY, 0, -1)).filter((entry) => entry.at !== at);
+  const tx = redis.multi();
+  tx.del(WALLET_LOG_KEY);
+  if (entries.length) tx.rpush(WALLET_LOG_KEY, ...entries);
+  await tx.exec();
+  res.status(200).json({ entries });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -111,6 +127,7 @@ export default async function handler(req, res) {
     if (action === 'save') return await save(req, res);
     if (action === 'upload') return await upload(req, res);
     if (action === 'walletLog') return await walletLog(req, res);
+    if (action === 'walletLogDelete') return await walletLogDelete(req, res);
     res.status(400).json({ error: 'Acción desconocida.' });
   } catch (err) {
     console.error(`admin ${action} error:`, err);

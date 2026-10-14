@@ -1,7 +1,7 @@
-// Step-by-step trace of an Apple Pay / Google Pay attempt. A failed attempt
-// is reported to /api/wallet-log (readable in /admin) because the customer's
-// phone console isn't reachable. Holds no customer details — only the
-// browser, the payment request and what the wallet did.
+// Step-by-step trace of an Apple Pay / Google Pay attempt. Every attempt is
+// reported to /api/wallet-log with its outcome (readable in /admin) because
+// the customer's phone console isn't reachable. Holds no customer details —
+// only the browser, the payment request and what the wallet did.
 
 // ?walletdebug in the URL also prints the trace on screen.
 export const WALLET_DEBUG =
@@ -23,11 +23,13 @@ const fmt = (value) => {
   }
 };
 
-function report(wallet, trace) {
+// outcome: 'paid' | 'cancelled' (sheet closed with no error) | 'failed'
+// (wallet error) | 'rejected' (our server/Square declined) | 'hidden'.
+function report(wallet, outcome, ms, trace) {
   fetch('/api/wallet-log', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ wallet, trace }),
+    body: JSON.stringify({ wallet, outcome, ms, trace }),
     keepalive: true,
   }).catch(() => {});
 }
@@ -46,7 +48,7 @@ export function reportApplePayUnavailable(err) {
   } catch (e) {
     lines.push(`canMakePayments threw: ${fmt(e)}`);
   }
-  report('applePay', lines.join('\n'));
+  report('applePay', 'hidden', 0, lines.join('\n'));
 }
 
 function traceApplePaySession(Original, log) {
@@ -120,14 +122,12 @@ export function startWalletTrace(wallet) {
 
   return {
     log,
-    // Ends the trace and returns its text; `failed` reports it to the server.
-    stop({ failed }) {
+    // Ends the trace, reports it with its outcome and returns its text.
+    stop(outcome) {
       restore.forEach((fn) => fn());
       const text = lines.join('\n');
-      if (failed) {
-        deepTrace = true;
-        report(wallet, text);
-      }
+      if (outcome !== 'paid') deepTrace = true;
+      report(wallet, outcome, Math.round(performance.now() - t0), text);
       return text;
     },
   };

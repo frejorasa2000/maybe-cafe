@@ -165,7 +165,7 @@ export default function CheckoutModal() {
     } catch (err) {
       console.warn('Wallet trace unavailable:', err);
     }
-    let failed = true;
+    let outcome = 'failed';
     try {
       // Must be the first await: Safari only opens the Apple Pay sheet while
       // still inside the tap's user gesture.
@@ -177,8 +177,10 @@ export default function CheckoutModal() {
         // validation failed) also comes back as "Cancel", and without a
         // message the button just looks dead.
         const detail = (result.errors || []).map((e) => e.message).filter(Boolean).join(' ');
-        if (result.status === 'Cancel' && !detail) setWalletError(t.checkout.walletCancelled);
-        else setWalletError(`${detail || t.checkout.walletFailed} (${result.status})`);
+        if (result.status === 'Cancel' && !detail) {
+          outcome = 'cancelled';
+          setWalletError(t.checkout.walletCancelled);
+        } else setWalletError(`${detail || t.checkout.walletFailed} (${result.status})`);
         return;
       }
       setOrderEta(estimatedMinutes);
@@ -192,17 +194,18 @@ export default function CheckoutModal() {
       // Server-side failures (declined, closed, …) go next to the wallet
       // buttons too, where the customer is looking.
       if (submitPayment.rejected.match(action)) {
+        outcome = 'rejected';
         trace?.log(`payment rejected: ${action.payload}`);
         setWalletError(action.payload || t.checkout.walletFailed);
       } else {
-        failed = false;
+        outcome = 'paid';
       }
     } catch (err) {
       console.error('Wallet payment error:', err);
       setWalletError(err.message || t.checkout.walletFailed);
     } finally {
       setWalletBusy(false);
-      const text = trace?.stop({ failed });
+      const text = trace?.stop(outcome);
       if (WALLET_DEBUG && text) setWalletTrace(text);
     }
   }
