@@ -1,4 +1,5 @@
-// Step-by-step trace of an Apple Pay / Google Pay attempt. Every attempt is
+// Step-by-step trace of a payment attempt (Apple Pay, Google Pay or the card
+// form — `wallet` is 'applePay' | 'googlePay' | 'card'). Every attempt is
 // reported to /api/wallet-log with its outcome (readable in /admin) because
 // the customer's phone console isn't reachable. Holds no customer details —
 // only the browser, the payment request and what the wallet did.
@@ -24,7 +25,8 @@ const fmt = (value) => {
 };
 
 // outcome: 'paid' | 'cancelled' (sheet closed with no error) | 'failed'
-// (wallet error) | 'rejected' (our server/Square declined) | 'hidden'.
+// (wallet error) | 'invalid' (card form refused the details) | 'rejected'
+// (our server/Square declined) | 'hidden'.
 function report(wallet, outcome, ms, trace) {
   fetch('/api/wallet-log', {
     method: 'POST',

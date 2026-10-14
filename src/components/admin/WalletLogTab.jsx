@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { adminCall } from '../../features/admin/adminApi';
 import { SmallButton } from './fields';
 
-const WALLET_NAMES = { applePay: 'Apple Pay', googlePay: 'Google Pay' };
+const WALLET_NAMES = { applePay: 'Apple Pay', googlePay: 'Google Pay', card: 'Tarjeta' };
 
 const formatDate = (iso) =>
   new Date(iso).toLocaleString('es', { timeZone: 'America/New_York', dateStyle: 'medium', timeStyle: 'short' });
@@ -11,8 +11,14 @@ const seconds = (ms) => (ms / 1000).toLocaleString('es', { maximumFractionDigits
 
 // Plain-language reading of an entry, shown above its technical trace.
 function describe(entry) {
-  const wallet = WALLET_NAMES[entry.wallet] || entry.wallet;
+  const isCard = entry.wallet === 'card';
+  const wallet = isCard ? 'tarjeta' : WALLET_NAMES[entry.wallet] || entry.wallet;
   switch (entry.outcome) {
+    case 'invalid':
+      return {
+        title: 'Datos de tarjeta no válidos',
+        text: 'El formulario no aceptó los datos de la tarjeta (por ejemplo, número, fecha o código incorrectos). No se cobró nada; el cliente puede corregirlos e intentarlo de nuevo.',
+      };
     case 'paid':
       return { ok: true, title: 'Pago completado', text: `El cliente pagó con ${wallet} y el pedido se cobró correctamente.` };
     case 'cancelled':
@@ -28,7 +34,7 @@ function describe(entry) {
     case 'rejected':
       return {
         title: 'Pago rechazado',
-        text: `${wallet} funcionó, pero el cobro fue rechazado (por ejemplo, tarjeta rechazada o tienda cerrada). El pedido no se completó.`,
+        text: `El cliente intentó pagar con ${wallet}, pero el cobro fue rechazado (por ejemplo, tarjeta rechazada o tienda cerrada). El pedido no se completó.`,
       };
     case 'hidden':
       return {
@@ -36,11 +42,13 @@ function describe(entry) {
         text: 'El cliente entró desde un dispositivo Apple, pero no se le pudo ofrecer Apple Pay (por ejemplo, sin tarjeta en Wallet o en navegación privada). Aun así puede pagar con tarjeta.',
       };
     default:
-      return { title: `Error de ${wallet}`, text: `${wallet} dio un error antes de cobrar. No se cobró nada.` };
+      return isCard
+        ? { title: 'Error al pagar con tarjeta', text: 'El pago con tarjeta dio un error inesperado y no se confirmó el cobro.' }
+        : { title: `Error de ${wallet}`, text: `${wallet} dio un error antes de cobrar. No se cobró nada.` };
   }
 }
 
-// Latest Apple Pay / Google Pay attempts, as reported by the checkout. The
+// Latest payment attempts (wallets and card), as reported by the checkout. The
 // trace is technical on purpose: it's meant to be copied and sent to whoever
 // maintains the site.
 export default function WalletLogTab() {
@@ -66,8 +74,8 @@ export default function WalletLogTab() {
   return (
     <div className="flex flex-col gap-5">
       <p className="text-sm text-espresso/60">
-        Últimos pagos con Apple Pay o Google Pay, completados o no (hora de Nueva York). No incluyen datos del cliente ni
-        de la tarjeta. Si algo falla, copia el detalle técnico y envíalo a quien mantiene el sitio.
+        Últimos pagos en línea con Apple Pay, Google Pay o tarjeta, completados o no (hora de Nueva York). No incluyen
+        datos del cliente ni de la tarjeta. Si algo falla, copia el detalle técnico y envíalo a quien mantiene el sitio.
       </p>
       {error && <p className="text-sm text-wine-soft">{error}</p>}
       {!error && !entries && <p className="text-sm text-espresso/60">Cargando…</p>}

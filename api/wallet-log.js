@@ -1,4 +1,4 @@
-// Receives the trace of an Apple Pay / Google Pay attempt from the checkout
+// Receives the trace of a payment attempt (wallet or card) from the checkout
 // (see src/utils/walletTrace.js) and keeps the latest ones in Redis for the
 // "Diagnóstico de pagos" tab of /admin. No customer details are sent and the
 // IP is only used for the rate limit, never stored with the entry.
@@ -8,7 +8,8 @@ export const WALLET_LOG_KEY = 'maybe:wallet-log';
 const MAX_ENTRIES = 50;
 const MAX_CHARS = 6000;
 const MAX_PER_IP = 20; // per hour
-const OUTCOMES = ['paid', 'cancelled', 'failed', 'rejected', 'hidden'];
+const WALLETS = ['applePay', 'googlePay', 'card'];
+const OUTCOMES = ['paid', 'cancelled', 'failed', 'invalid', 'rejected', 'hidden'];
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -20,7 +21,7 @@ export default async function handler(req, res) {
   if (
     typeof trace !== 'string' ||
     !trace.trim() ||
-    !['applePay', 'googlePay'].includes(wallet) ||
+    !WALLETS.includes(wallet) ||
     !OUTCOMES.includes(outcome)
   ) {
     res.status(400).json({ error: 'Invalid log.' });

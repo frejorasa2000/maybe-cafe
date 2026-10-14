@@ -238,19 +238,39 @@ export default function CheckoutModal() {
     e.preventDefault();
     if (!cardRef.current || !ordering.open) return;
     setCardError(null);
-    const result = await cardRef.current.tokenize();
-    if (result.status !== 'OK') {
-      setCardError(result.errors?.[0]?.message || 'Card details are invalid.');
-      return;
+    // Same diagnostics as the wallets (no card details, only the outcome).
+    let trace = null;
+    try {
+      trace = startWalletTrace('card');
+    } catch (err) {
+      console.warn('Payment trace unavailable:', err);
     }
-    setOrderEta(estimatedMinutes);
-    dispatch(
-      submitPayment({
-        sourceId: result.token,
-        customer: fields,
-        items: items.map(toOrderItem),
-      })
-    );
+    let outcome = 'failed';
+    try {
+      const result = await cardRef.current.tokenize();
+      trace?.log(`tokenize → ${result.status} ${JSON.stringify(result.errors || [])}`);
+      if (result.status !== 'OK') {
+        outcome = 'invalid';
+        setCardError(result.errors?.[0]?.message || 'Card details are invalid.');
+        return;
+      }
+      setOrderEta(estimatedMinutes);
+      const action = await dispatch(
+        submitPayment({
+          sourceId: result.token,
+          customer: fields,
+          items: items.map(toOrderItem),
+        })
+      );
+      if (submitPayment.rejected.match(action)) {
+        outcome = 'rejected';
+        trace?.log(`payment rejected: ${action.payload}`);
+      } else {
+        outcome = 'paid';
+      }
+    } finally {
+      trace?.stop(outcome);
+    }
   }
 
   const inputClass =
