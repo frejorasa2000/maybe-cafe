@@ -4,6 +4,7 @@ import ProductsTab from '../components/admin/ProductsTab';
 import OptionsTab from '../components/admin/OptionsTab';
 import HoursTab from '../components/admin/HoursTab';
 import PhotoListTab, { PHOTO_LISTS } from '../components/admin/PhotoListTab';
+import WalletLogTab from '../components/admin/WalletLogTab';
 import { inputClass } from '../components/admin/fields';
 import logo from '../assets/images/logo.png';
 
@@ -13,6 +14,7 @@ const TABS = [
   ['hours', 'Horario'],
   ['menuBoards', 'Imágenes del menú'],
   ['gallery', 'Galería'],
+  ['walletLog', 'Diagnóstico de pagos'],
 ];
 
 function LoginForm({ onLoggedIn }) {
@@ -186,6 +188,7 @@ export default function AdminPage() {
         {tab === 'gallery' && (
           <PhotoListTab key="gallery" config={PHOTO_LISTS.gallery} catalog={draft} onChange={setDraft} canUpload={storage.images} />
         )}
+        {tab === 'walletLog' && <WalletLogTab />}
       </main>
 
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-espresso/10 bg-paper/95 backdrop-blur">

@@ -9,6 +9,7 @@ import Button from '../atoms/Button';
 import { PHONE } from '../../data/siteInfo';
 import { useT } from '../../hooks/useT';
 import { useOrderingStatus } from '../../hooks/useOrderingStatus';
+import { WALLET_DEBUG, startWalletTrace } from '../../utils/walletTrace';
 
 const APP_ID = import.meta.env.VITE_SQUARE_APP_ID;
 const LOCATION_ID = import.meta.env.VITE_SQUARE_LOCATION_ID;
@@ -50,6 +51,8 @@ export default function CheckoutModal() {
   // True from the tap until the wallet sheet returns, so the tap always has
   // a visible effect even if the sheet never shows up.
   const [walletBusy, setWalletBusy] = useState(false);
+  // Step-by-step log of the last wallet attempt, shown only with ?walletdebug.
+  const [walletTrace, setWalletTrace] = useState(null);
 
   const googlePayContainerRef = useRef(null);
   const googlePayRef = useRef(null);
@@ -154,10 +157,19 @@ export default function CheckoutModal() {
     }
     setWalletError(null);
     setWalletBusy(true);
+    // Diagnostics only — must never get in the way of the payment itself.
+    let trace = null;
+    try {
+      trace = startWalletTrace(walletRef === applePayRef ? 'applePay' : 'googlePay');
+    } catch (err) {
+      console.warn('Wallet trace unavailable:', err);
+    }
+    let failed = true;
     try {
       // Must be the first await: Safari only opens the Apple Pay sheet while
       // still inside the tap's user gesture.
       const result = await instance.tokenize();
+      trace?.log(`tokenize → ${result.status} ${JSON.stringify(result.errors || [])}`);
       if (result.status !== 'OK') {
         console.warn('Wallet tokenize failed:', result);
         // Never fail silently: a sheet that closes by itself (e.g. merchant
@@ -178,12 +190,19 @@ export default function CheckoutModal() {
       );
       // Server-side failures (declined, closed, …) go next to the wallet
       // buttons too, where the customer is looking.
-      if (submitPayment.rejected.match(action)) setWalletError(action.payload || t.checkout.walletFailed);
+      if (submitPayment.rejected.match(action)) {
+        trace?.log(`payment rejected: ${action.payload}`);
+        setWalletError(action.payload || t.checkout.walletFailed);
+      } else {
+        failed = false;
+      }
     } catch (err) {
       console.error('Wallet payment error:', err);
       setWalletError(err.message || t.checkout.walletFailed);
     } finally {
       setWalletBusy(false);
+      const text = trace?.stop({ failed });
+      if (WALLET_DEBUG && text) setWalletTrace(text);
     }
   }
 
@@ -193,6 +212,7 @@ export default function CheckoutModal() {
       setCardError(null);
       setWalletError(null);
       setWalletBusy(false);
+      setWalletTrace(null);
       setOrderEta(null);
     }
   }, [isOpen]);
@@ -354,6 +374,11 @@ export default function CheckoutModal() {
                       <p role="alert" className="rounded-lg bg-wine/10 px-3 py-2 text-xs text-wine-soft">
                         {walletError}
                       </p>
+                    )}
+                    {walletTrace && (
+                      <pre className="max-h-60 overflow-auto whitespace-pre-wrap break-all rounded-lg bg-espresso/5 p-2 text-[10px] text-espresso select-text">
+                        {walletTrace}
+                      </pre>
                     )}
                     {walletBusy && status !== 'submitting' && (
                       <p className="text-center text-xs text-espresso/60">{t.checkout.walletOpening}</p>

@@ -9,9 +9,10 @@ import {
   tooManyAttempts,
 } from './_lib/adminAuth.js';
 import { slugify, validateCatalog } from '../src/data/catalog.js';
+import { WALLET_LOG_KEY } from './wallet-log.js';
 
 // Everything the /admin panel needs, behind one function (Vercel's Hobby plan
-// caps the number of functions): POST /api/admin?action=login|logout|session|save|upload.
+// caps the number of functions): POST /api/admin?action=login|logout|session|save|upload|walletLog.
 // Uploaded photos are already resized to a small JPEG in the browser.
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
 
@@ -77,6 +78,11 @@ async function upload(req, res) {
   res.status(200).json({ url: blob.url });
 }
 
+async function walletLog(req, res) {
+  const redis = getRedis();
+  res.status(200).json({ entries: redis ? await redis.lrange(WALLET_LOG_KEY, 0, -1) : [] });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
@@ -104,6 +110,7 @@ export default async function handler(req, res) {
     if (action === 'session') return await session(req, res);
     if (action === 'save') return await save(req, res);
     if (action === 'upload') return await upload(req, res);
+    if (action === 'walletLog') return await walletLog(req, res);
     res.status(400).json({ error: 'Acción desconocida.' });
   } catch (err) {
     console.error(`admin ${action} error:`, err);
