@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://maybe-cafe.vercel.app/sitemap.xml
+Sitemap: https://maybecafe.com/sitemap.xml

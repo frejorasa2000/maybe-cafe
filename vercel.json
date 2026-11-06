@@ -1,4 +1,18 @@
 {
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [{ "type": "host", "value": "www.maybecafe.com" }],
+      "destination": "https://maybecafe.com/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/:path((?!api/).*)",
+      "has": [{ "type": "host", "value": "maybe-cafe.vercel.app" }],
+      "destination": "https://maybecafe.com/:path",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     { "source": "/admin", "destination": "/index.html" },
     { "source": "/privacy", "destination": "/index.html" }
