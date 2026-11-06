@@ -27,6 +27,13 @@ export const content = {
       heading: ['More Than a', 'Coffee Stop'],
       p1: "Maybe Café is more than a coffee shop — it's a place where handcrafted coffee, fresh pastries, and meaningful moments come together.",
       p2: 'Every visit is an invitation to slow down, connect, and enjoy exceptional coffee right here at home.',
+      p3: 'From your morning espresso to an afternoon açaí bowl, everything is made by hand, the moment you order it.',
+      highlightsEyebrow: 'What you’ll find',
+      highlights: [
+        { title: 'Specialty Coffee', text: 'Espresso, lattes and signature drinks, hot or iced.' },
+        { title: 'Matcha & Açaí', text: 'Creamy matcha lattes and açaí bowls topped your way.' },
+        { title: 'Mini Pancakes', text: 'Warm, fresh and loaded with your favorite toppings.' },
+      ],
       signature: '— The Maybe Café Team',
     },
     favorites: {
@@ -232,6 +239,13 @@ export const content = {
       heading: ['Más que una', 'parada de café'],
       p1: 'Maybe Café es más que una cafetería — es un lugar donde el café artesanal, la pastelería fresca y los momentos con sentido se encuentran.',
       p2: 'Cada visita es una invitación a bajar el ritmo, conectar y disfrutar de un café excepcional aquí, en casa.',
+      p3: 'Desde tu espresso de la mañana hasta un açaí bowl por la tarde, todo se prepara a mano, en el momento en que lo pides.',
+      highlightsEyebrow: 'Lo que encuentras',
+      highlights: [
+        { title: 'Café de especialidad', text: 'Espresso, lattes y bebidas de la casa, calientes o fríos.' },
+        { title: 'Matcha y açaí', text: 'Matcha lattes cremosos y açaí bowls a tu gusto.' },
+        { title: 'Mini pancakes', text: 'Calientitos, recién hechos y con tus toppings favoritos.' },
+      ],
       signature: '— El equipo de Maybe Café',
     },
     favorites: {

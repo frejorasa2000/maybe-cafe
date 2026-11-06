@@ -6,14 +6,16 @@ import { selectMenu } from '../../features/catalog/catalogSlice';
 import { useT } from '../../hooks/useT';
 import { useOrderingStatus } from '../../hooks/useOrderingStatus';
 
-export default function MenuSection() {
+// singleColumn: one card per row on desktop too (used next to the hero
+// animation, which takes the right half of the screen).
+export default function MenuSection({ singleColumn = false }) {
   const { t, lang } = useT();
   const ordering = useOrderingStatus();
   const menu = useSelector(selectMenu);
 
   return (
     <section id="favorites" className="border-t border-espresso/10 py-24 sm:py-32">
-      <div className="mx-auto max-w-5xl px-6 sm:px-10">
+      <div className={`mx-auto px-6 sm:px-10 ${singleColumn ? 'max-w-5xl lg:max-w-2xl lg:mr-0' : 'max-w-5xl'}`}>
         <Reveal className="mx-auto mb-16 max-w-xl text-center sm:mb-20">
           <Eyebrow center>{t.favorites.eyebrow}</Eyebrow>
           <h2 className="mt-6 font-display text-4xl uppercase sm:text-5xl">{t.favorites.heading}</h2>
@@ -26,7 +28,7 @@ export default function MenuSection() {
           </p>
         )}
 
-        <div className="grid gap-4 sm:grid-cols-2 sm:gap-5">
+        <div className={`grid gap-4 sm:grid-cols-2 sm:gap-5 ${singleColumn ? 'lg:grid-cols-1' : ''}`}>
           {menu.map((dish, i) => (
             <DishListItem key={dish.id} dish={dish} lang={lang} canOrder={ordering.open} delay={(i % 2) * 0.08} />
           ))}
