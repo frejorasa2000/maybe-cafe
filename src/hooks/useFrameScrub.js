@@ -15,13 +15,22 @@ export function useFrameScrub({
   small = false,
   reduced = false,
   onProgress,
+  // extra scroll (in screen heights) after the target's bottom reaches the
+  // bottom of the screen before the last frame lands (negative = earlier)
+  extraVh = 0,
+  // in-place mode, [start, end] as fractions of the screen height: frame 0
+  // while the target's top is at start·vh (entering), last frame once it has
+  // risen to end·vh — plays while the section passes, adds no page height
+  viewRange = null,
+  // false → do nothing (e.g. the canvas is hidden at this screen size)
+  enabled = true,
 }) {
   const optsKey = JSON.stringify(drawOpts);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     const target = targetRef.current;
-    if (!canvas || !target) return undefined;
+    if (!enabled || !canvas || !target) return undefined;
     const ctx = canvas.getContext('2d');
     let dpr = 1;
 
@@ -40,7 +49,12 @@ export function useFrameScrub({
 
     const progress = () => {
       const rect = target.getBoundingClientRect();
-      const max = rect.height - window.innerHeight;
+      if (viewRange) {
+        const vh = window.innerHeight;
+        const [s, e] = viewRange;
+        return Math.min(1, Math.max(0, (s * vh - rect.top) / ((s - e) * vh)));
+      }
+      const max = rect.height - window.innerHeight + extraVh * window.innerHeight;
       return max > 0 ? Math.min(1, Math.max(0, -rect.top / max)) : rect.top < 0 ? 1 : 0;
     };
 
@@ -109,5 +123,5 @@ export function useFrameScrub({
       window.removeEventListener('scroll', onScroll);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [folder, frameCount, optsKey, scrub, small, reduced]);
+  }, [folder, frameCount, optsKey, scrub, small, reduced, extraVh, targetRef, viewRange?.[0], viewRange?.[1], enabled]);
 }

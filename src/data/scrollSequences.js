@@ -61,6 +61,9 @@ export const SCROLL_SEQUENCES = {
   // mci/aobmc/bidir), lanczos to 1600 px + light unsharp, WebP q80.
   'acai-v2': {
     folder: '/frames/acai-v2',
+    // phones: same frames with the gray background pushed to white, drawn in
+    // front of the text with "multiply" (the white vanishes)
+    mobileFolder: '/frames/acai-v2-light',
     frameCount: 169,
     // corners of the footage: light gray left, a little darker right
     background: '#D4D2D7',
@@ -82,6 +85,13 @@ export const SCROLL_SEQUENCES = {
     //    vh of page (the page keeps scrolling); Favorites follows on a solid
     //    background.
     panelScale: 0.75,
+    // desktop: 'story' = the bowl fills while the story is read (more
+    // noticeable) and stays complete next to Favorites; 'menu' = spread
+    // until right before Full Menu. desktopFinishOffset: extra screens of
+    // scroll after the story before the last frame (0.5 = Favorites heading
+    // halfway up the screen).
+    desktopFinish: 'story',
+    desktopFinishOffset: 0.5,
     pinHeight: { desktop: 200, mobile: 170 },
     scrub: 0.15,
     filter: 'none',

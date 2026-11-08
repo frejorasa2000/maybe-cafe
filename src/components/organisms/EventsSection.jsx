@@ -2,7 +2,7 @@ import Eyebrow from '../atoms/Eyebrow';
 import Reveal from '../atoms/Reveal';
 import Button from '../atoms/Button';
 import { useT } from '../../hooks/useT';
-import tropicalParadise from '../../assets/images/tropical-paradise-acai.jpg';
+import InlineScrub from '../atoms/InlineScrub';
 import { PHONE } from '../../data/siteInfo';
 
 export default function EventsSection() {
@@ -11,13 +11,15 @@ export default function EventsSection() {
 
   return (
     <section id="events" className="grid gap-0 border-t border-espresso/10 lg:grid-cols-2">
-      <Reveal className="relative aspect-[4/3] overflow-hidden lg:aspect-auto">
-        <img src={tropicalParadise} alt="Tropical Paradise açaí bowl" className="h-full w-full object-cover" style={{ filter: 'saturate(.85)' }} />
-        <div
-          className="absolute inset-0"
-          style={{ background: 'linear-gradient(90deg, #09080a, transparent 30%), linear-gradient(0deg, rgba(110,36,48,.25), transparent 55%)' }}
-        />
-      </Reveal>
+      {/* caramel latte being built as the section scrolls in (was the
+          Tropical Paradise açaí photo) */}
+      <InlineScrub
+        sequence="caramel-latte"
+        label="Iced caramel latte being poured"
+        className="aspect-[4/3] lg:aspect-auto lg:min-h-[36rem]"
+        zoom={1.5}
+        focusY={0.54}
+      />
 
       <div className="flex flex-col justify-center px-6 py-20 sm:px-10 lg:py-24 lg:pl-20">
         <Reveal>

@@ -19,11 +19,15 @@ export function loadOrder(count) {
   return order;
 }
 
-export function drawCover(ctx, img, w, h) {
-  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+// Fills the canvas. zoom > 1 crops further in; focusX / focusY (0–1) pick
+// which part of the frame stays centred when it is cropped.
+export function drawCover(ctx, img, w, h, { zoom = 1, focusX = 0.5, focusY = 0.5 } = {}) {
+  const scale = Math.max(w / img.naturalWidth, h / img.naturalHeight) * zoom;
   const dw = img.naturalWidth * scale;
   const dh = img.naturalHeight * scale;
-  ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
+  const dx = Math.min(0, Math.max(w - dw, w / 2 - dw * focusX));
+  const dy = Math.min(0, Math.max(h - dh, h / 2 - dh * focusY));
+  ctx.drawImage(img, dx, dy, dw, dh);
 }
 
 // Whole frame visible, its edges feathered to transparent so the background
@@ -82,6 +86,7 @@ export function drawContain(ctx, img, w, h, {
 export function drawFrame(ctx, img, w, h, {
   fit, focusX, mobileScale, small, desktopScale = 1, fitWidth = false,
   maxWidth = Infinity, dpr = 1, alignY = 'bottom', mobileOffsetY = 0,
+  zoom = 1, focusY = 0.5,
 }) {
   ctx.clearRect(0, 0, w, h);
   if (fit === 'contain') {
@@ -94,6 +99,6 @@ export function drawFrame(ctx, img, w, h, {
       offsetY: small ? mobileOffsetY : 0,
     });
   } else {
-    drawCover(ctx, img, w, h);
+    drawCover(ctx, img, w, h, { zoom, focusX, focusY });
   }
 }

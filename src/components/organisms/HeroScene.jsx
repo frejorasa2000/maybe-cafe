@@ -64,11 +64,16 @@ export default function HeroScene({ seq, stages = [], story, after }) {
     setStage(s);
   };
 
+  // desktop: seq.desktopFinish = 'story' → the bowl fills while the story is
+  // read and is complete as Favorites comes in (desktopFinishOffset screens
+  // later); 'menu' → spread over story + Favorites, ending before Full Menu.
+  // phones: always over the story.
+  const finishAtStory = !wide || (seq.desktopFinish ?? 'menu') === 'story';
   useFrameScrub({
     canvasRef,
-    // desktop: the whole scene (story + Favorites); phones: the story only
-    targetRef: wide ? sceneRef : storyRef,
-    folder: seq.folder,
+    targetRef: finishAtStory ? storyRef : sceneRef,
+    extraVh: wide && finishAtStory ? (seq.desktopFinishOffset ?? 0) : 0,
+    folder: wide ? seq.folder : seq.mobileFolder ?? seq.folder,
     frameCount: seq.frameCount,
     scrub: seq.scrub,
     small: !wide,
@@ -92,7 +97,7 @@ export default function HeroScene({ seq, stages = [], story, after }) {
       <section id="top" ref={sceneRef} className="relative">
         <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <div className="min-w-0">
-            {story}
+            <div ref={storyRef}>{story}</div>
             {after}
           </div>
           <div className="relative">
@@ -120,18 +125,33 @@ export default function HeroScene({ seq, stages = [], story, after }) {
     );
   }
 
-  const mobileVh = seq.pinHeight?.mobile ?? 180;
+  // phones: full-screen animation pinned over the story, IN FRONT of the
+  // text. The phone frames (seq.mobileFolder) have a white background and
+  // the layer is blended with "multiply", so the white disappears: the bowl,
+  // the pour and their shadows sit on top of the letters, which stay visible
+  // around them. This area is always light (also in dark mode) so the
+  // multiply works.
+  const mobileVh = seq.pinHeight?.mobile ?? 170;
+  const lightVars = {
+    ...seq.cssVars,
+    '--color-paper': '#faf9f5',
+    '--color-paper-2': '#f0ede5',
+    backgroundColor: '#faf9f5',
+  };
   return (
     <section id="top" ref={sceneRef} className="relative">
-      {/* at least mobileVh tall; longer story content stretches the animation */}
-      <div ref={storyRef} className="relative" style={{ minHeight: reduced ? undefined : `${mobileVh}vh`, ...seq.cssVars }}>
-        <div aria-hidden="true" className="pointer-events-none sticky top-0 -mb-[100vh] h-screen overflow-hidden" style={panelBg}>
+      <div ref={storyRef} className="relative isolate" style={{ minHeight: reduced ? undefined : `${mobileVh}vh`, ...lightVars }}>
+        <div className="relative z-10">{story}</div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none sticky bottom-0 z-20 -mt-[100vh] h-screen overflow-hidden"
+          style={{ mixBlendMode: 'multiply' }}
+        >
           <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
           <Captions stages={stages} stage={stage} reduced={reduced} className="bottom-[3vh]" />
         </div>
-        <div className="relative z-10">{story}</div>
       </div>
-      <div className="relative z-10 bg-paper">{after}</div>
+      <div className="relative z-10">{after}</div>
     </section>
   );
 }

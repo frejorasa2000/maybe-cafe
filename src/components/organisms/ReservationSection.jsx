@@ -1,6 +1,7 @@
 import Eyebrow from '../atoms/Eyebrow';
 import Reveal from '../atoms/Reveal';
 import ReservationForm from './ReservationForm';
+import InlineScrub from '../atoms/InlineScrub';
 import { useT } from '../../hooks/useT';
 
 export default function ReservationSection() {
@@ -14,9 +15,20 @@ export default function ReservationSection() {
           <h2 className="mt-6 font-display text-4xl uppercase sm:text-5xl">{t.reservations.heading}</h2>
         </Reveal>
 
-        <Reveal delay={0.05} className="mx-auto max-w-lg">
-          <ReservationForm />
-        </Reveal>
+        {/* desktop: iced americano next to the form (plays as the section
+            scrolls in); phones: just the form, so the page stays short */}
+        <div className="mx-auto max-w-lg lg:grid lg:max-w-none lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1fr)] lg:items-center lg:gap-14">
+          <InlineScrub
+            sequence="iced-coffee"
+            label="Iced americano being poured"
+            fit="contain"
+            minWidth={1024}
+            className="hidden aspect-[3/4] rounded-2xl lg:block"
+          />
+          <Reveal delay={0.05}>
+            <ReservationForm />
+          </Reveal>
+        </div>
       </div>
     </section>
   );

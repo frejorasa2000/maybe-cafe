@@ -84,8 +84,8 @@ function HeroCopy({ copy }) {
 function Story({ t }) {
   const [heading1, heading2] = t.story.heading;
   return (
-    // phones: the bottom padding leaves the finished bowl in view before the
-    // Favorites menu comes in
+    // phones: the bottom padding leaves the finished bowl in view (it sits in
+    // front of the text) before the Favorites menu comes in
     <div id="story" className="px-6 pt-32 pb-[52vh] sm:px-10 lg:pb-20 lg:min-h-screen lg:pt-40 lg:pr-4 lg:pl-[max(2.5rem,calc((100vw-80rem)/2+2.5rem))]">
       <Eyebrow>{t.story.eyebrow}</Eyebrow>
       <motion.h1
@@ -124,14 +124,11 @@ function Story({ t }) {
         <Eyebrow>{t.story.highlightsEyebrow}</Eyebrow>
         <ul className="mt-6 grid max-w-xl gap-3 sm:grid-cols-3 lg:grid-cols-1">
           {t.story.highlights.map((h) => (
-            // phones: always light — they sit on the light footage, also in
-            // dark mode; desktop: on the page itself, so they follow the theme
-            <li
-              key={h.title}
-              className="rounded-2xl border border-[#1f1810]/10 bg-[#faf9f5]/80 px-5 py-4 backdrop-blur-sm lg:border-espresso/10 lg:bg-paper-2/60 lg:backdrop-blur-none"
-            >
-              <p className="font-display text-lg tracking-wide text-[#1f1810] uppercase lg:text-espresso">{h.title}</p>
-              <p className="mt-1 text-sm leading-relaxed font-light text-[#1f1810]/70 lg:text-espresso/65">{h.text}</p>
+            // on the page background (next to / below the animation), so they
+            // follow the light / dark theme
+            <li key={h.title} className="rounded-2xl border border-espresso/10 bg-paper-2/60 px-5 py-4">
+              <p className="font-display text-lg tracking-wide text-espresso uppercase">{h.title}</p>
+              <p className="mt-1 text-sm leading-relaxed font-light text-espresso/65">{h.text}</p>
             </li>
           ))}
         </ul>
