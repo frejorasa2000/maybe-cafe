@@ -125,6 +125,10 @@ export const SCROLL_SEQUENCES = {
   // Source: src/assets/videos/caramel-latte-original.mp4
   'caramel-latte': {
     folder: '/frames/caramel-latte',
+    // same frames with the studio gray pushed to white: InlineScrub blends
+    // them with "multiply" in the light theme so they sit on the page
+    // background (Events section)
+    lightFolder: '/frames/caramel-latte-light',
     frameCount: 150,
     // studio gray just inside the feathered edges of the 16:9 frames
     background: '#E5E4E7',

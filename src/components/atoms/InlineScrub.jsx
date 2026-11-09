@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { useFrameScrub } from '../../hooks/useFrameScrub';
 import { SCROLL_SEQUENCES } from '../../data/scrollSequences';
 
@@ -22,6 +23,11 @@ export default function InlineScrub({
   minWidth = 0,
 }) {
   const seq = SCROLL_SEQUENCES[sequence];
+  // light theme + seq.lightFolder: frames with a white background, blended
+  // with "multiply" so the footage sits on the page's own background.
+  // Dark theme keeps the original footage (multiply would vanish on dark).
+  const theme = useSelector((s) => s.ui.theme);
+  const blend = Boolean(seq.lightFolder) && theme !== 'dark';
   const boxRef = useRef(null);
   const canvasRef = useRef(null);
   const [reduced] = useState(() => window.matchMedia('(prefers-reduced-motion: reduce)').matches);
@@ -52,7 +58,7 @@ export default function InlineScrub({
   useFrameScrub({
     canvasRef,
     targetRef: boxRef,
-    folder: seq.folder,
+    folder: blend ? seq.lightFolder : seq.folder,
     frameCount: seq.frameCount,
     scrub: 0.2,
     reduced,
@@ -68,9 +74,17 @@ export default function InlineScrub({
       aria-label={label}
       aria-hidden={label ? undefined : true}
       className={`relative overflow-hidden ${className}`}
-      style={{ backgroundColor: seq.background, backgroundImage: seq.backgroundGradient || undefined, ...style }}
+      style={
+        blend
+          ? style
+          : { backgroundColor: seq.background, backgroundImage: seq.backgroundGradient || undefined, ...style }
+      }
     >
-      <canvas ref={canvasRef} className="absolute inset-0 block h-full w-full" />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 block h-full w-full"
+        style={blend ? { mixBlendMode: 'multiply' } : undefined}
+      />
     </div>
   );
 }
